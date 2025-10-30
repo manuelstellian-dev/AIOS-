@@ -10,6 +10,7 @@ Architecture:
 - Entropy Model: Torch Linear(1,1) + Sigmoid
 - Immutable Ledger: SHA3-256 blockchain with Merkle root
 - P2P Mesh: Nanobot Phalanx with adaptive FIFO delivery
+- Observability: Prometheus metrics, health checks, monitoring
 """
 
 __version__ = "0.1.0"
@@ -23,6 +24,7 @@ from .control.genomic_pid import GenomicPID
 from .inference.entropy_model import EntropyModel
 from .ledger.immutable_ledger import ImmutableLedger, LedgerEntry
 from .mesh.p2p import P2PMesh
+from .observability import MetricsCollector, MetricsServer, HealthChecker
 
 __all__ = [
     "Arbiter",
@@ -42,4 +44,7 @@ __all__ = [
     "ImmutableLedger",
     "LedgerEntry",
     "P2PMesh",
+    "MetricsCollector",
+    "MetricsServer",
+    "HealthChecker",
 ]
