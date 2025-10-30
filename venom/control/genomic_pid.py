@@ -2,6 +2,12 @@
 Genomic PID Controller
 Maintains system stability (ΔV < 0) by recalibrating O flow weight
 Prevents drift in the fractal organism
+
+Implements:
+- Error ΔT = T_Λ - T_threshold (where T_threshold = 0.02)
+- Anti-windup: integral clamped to [-1.0, 1.0]
+- ε-reset: integral reset to 0 when |ΔT| < 1e-4
+- Weight adjustment: ΔO limited to ±0.05 per beat
 """
 import time
 from typing import Dict, Any, Optional
@@ -11,36 +17,51 @@ class GenomicPID:
     """
     PID controller for genomic stability
     Ensures ΔV < 0 by adjusting optimization weight in O flow
+    
+    Uses parameters from BalanceCore: Kp=0.6, Ki=0.1, Kd=0.05
     """
     
-    def __init__(self, kp: float = 0.5, ki: float = 0.1, kd: float = 0.2, 
-                 setpoint: float = 0.0):
+    def __init__(self, kp: float = 0.6, ki: float = 0.1, kd: float = 0.05, 
+                 t_threshold: float = 0.02):
         """
         Initialize Genomic PID controller
         
         Args:
-            kp: Proportional gain
-            ki: Integral gain  
-            kd: Derivative gain
-            setpoint: Target stability value (default 0 for ΔV < 0)
+            kp: Proportional gain (default 0.6 from BalanceCore)
+            ki: Integral gain (default 0.1 from BalanceCore)
+            kd: Derivative gain (default 0.05 from BalanceCore)
+            t_threshold: Time threshold for error calculation (default 0.02)
         """
         self.kp = kp
         self.ki = ki
         self.kd = kd
-        self.setpoint = setpoint
+        self.t_threshold = t_threshold
         
+        # State variables
         self.integral = 0.0
         self.previous_error = 0.0
         self.previous_time: Optional[float] = None
         
-        self.stability_history = []
+        # Constants
+        self.INTEGRAL_CLAMP_MIN = -1.0
+        self.INTEGRAL_CLAMP_MAX = 1.0
+        self.EPSILON_RESET = 1e-4
+        self.MAX_WEIGHT_DELTA = 0.05
         
-    def compute(self, current_value: float, timestamp: Optional[float] = None) -> Dict[str, Any]:
+        self.stability_history = []
+    
+    def update_params(self, kp: float, ki: float, kd: float):
+        """Update PID parameters (typically from BalanceCore)"""
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        
+    def compute(self, t_lambda: float, timestamp: Optional[float] = None) -> Dict[str, Any]:
         """
-        Compute PID control output
+        Compute PID control output for T_Λ
         
         Args:
-            current_value: Current system value (e.g., entropy level)
+            t_lambda: Current T_Λ value
             timestamp: Optional timestamp, defaults to current time
             
         Returns:
@@ -49,8 +70,8 @@ class GenomicPID:
         if timestamp is None:
             timestamp = time.time()
             
-        # Calculate error
-        error = self.setpoint - current_value
+        # Calculate error: ΔT = T_Λ - T_threshold
+        delta_t = t_lambda - self.t_threshold
         
         # Time delta
         if self.previous_time is None:
@@ -58,33 +79,46 @@ class GenomicPID:
         else:
             dt = timestamp - self.previous_time
             
+        # ε-reset: Reset integral if error is very small
+        if abs(delta_t) < self.EPSILON_RESET:
+            self.integral = 0.0
+            
         # Proportional term
-        p_term = self.kp * error
+        p_term = self.kp * delta_t
         
-        # Integral term
+        # Integral term with anti-windup clamping
         if dt > 0:
-            self.integral += error * dt
+            self.integral += delta_t * dt
+            # Apply anti-windup clamping to [-1.0, 1.0]
+            self.integral = max(self.INTEGRAL_CLAMP_MIN, 
+                               min(self.INTEGRAL_CLAMP_MAX, self.integral))
         i_term = self.ki * self.integral
         
         # Derivative term
-        if dt > 0:
-            derivative = (error - self.previous_error) / dt
+        if dt > 0 and self.previous_time is not None:
+            derivative = (delta_t - self.previous_error) / dt
         else:
             derivative = 0.0
         d_term = self.kd * derivative
         
-        # Total control output
-        output = p_term + i_term + d_term
+        # Total PID output
+        pid_out = p_term + i_term + d_term
+        
+        # Calculate weight adjustment (limited to ±0.05)
+        weight_adjustment = -pid_out  # Negative feedback
+        weight_adjustment = max(-self.MAX_WEIGHT_DELTA, 
+                               min(self.MAX_WEIGHT_DELTA, weight_adjustment))
         
         # Calculate ΔV (stability delta)
-        delta_v = error - self.previous_error
+        delta_v = delta_t - self.previous_error
         stable = delta_v < 0
         
         # Update state
-        self.previous_error = error
+        self.previous_error = delta_t
         self.previous_time = timestamp
         self.stability_history.append({
             "timestamp": timestamp,
+            "delta_t": delta_t,
             "delta_v": delta_v,
             "stable": stable
         })
@@ -94,14 +128,15 @@ class GenomicPID:
             self.stability_history = self.stability_history[-1000:]
         
         return {
-            "pid_output": output,
+            "pid_out": pid_out,
             "p_term": p_term,
             "i_term": i_term,
             "d_term": d_term,
-            "error": error,
+            "delta_t": delta_t,
             "delta_v": delta_v,
             "stable": stable,
-            "adjustment": -output  # Negative feedback for recalibration
+            "weight_adjustment": weight_adjustment,
+            "integral": self.integral
         }
     
     def reset(self):

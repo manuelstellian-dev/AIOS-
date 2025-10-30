@@ -47,7 +47,7 @@ class ImmutableLedger:
     def _calculate_hash(self, index: int, timestamp: float, 
                        data: Dict[str, Any], previous_hash: str) -> str:
         """
-        Calculate SHA3-256 hash for a ledger entry
+        Calculate SHA3-256 hash for a ledger entry using canonical JSON
         
         Args:
             index: Entry index
@@ -58,13 +58,13 @@ class ImmutableLedger:
         Returns:
             SHA3-256 hash as hex string
         """
-        # Create deterministic string representation
+        # Create canonical JSON representation (sorted keys, no whitespace)
         entry_string = json.dumps({
             "index": index,
             "timestamp": timestamp,
             "data": data,
             "previous_hash": previous_hash
-        }, sort_keys=True)
+        }, sort_keys=True, separators=(",", ":"))
         
         # Calculate SHA3-256
         return hashlib.sha3_256(entry_string.encode()).hexdigest()
@@ -218,3 +218,48 @@ class ImmutableLedger:
             List of entry dictionaries
         """
         return [entry.to_dict() for entry in self.chain]
+    
+    def compute_merkle_root(self) -> str:
+        """
+        Compute Merkle root hash from all entry hashes
+        
+        Returns:
+            Merkle root hash as hex string
+        """
+        if not self.chain:
+            return "0" * 64
+        
+        # Collect all hashes
+        hashes = [entry.hash for entry in self.chain]
+        
+        # Build Merkle tree
+        while len(hashes) > 1:
+            if len(hashes) % 2 != 0:
+                # Duplicate last hash if odd number
+                hashes.append(hashes[-1])
+            
+            new_level = []
+            for i in range(0, len(hashes), 2):
+                # Combine pairs and hash
+                combined = hashes[i] + hashes[i + 1]
+                new_hash = hashlib.sha3_256(combined.encode()).hexdigest()
+                new_level.append(new_hash)
+            
+            hashes = new_level
+        
+        return hashes[0]
+    
+    def get_manifest(self) -> Dict[str, Any]:
+        """
+        Get ledger manifest with Merkle root
+        
+        Returns:
+            Manifest dictionary with metadata and Merkle root
+        """
+        return {
+            "chain_length": len(self.chain),
+            "genesis_hash": self.chain[0].hash if self.chain else None,
+            "latest_hash": self.chain[-1].hash if self.chain else None,
+            "merkle_root": self.compute_merkle_root(),
+            "timestamp": time.time()
+        }

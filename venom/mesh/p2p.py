@@ -1,11 +1,18 @@
 """
-P2P Mesh Network
+P2P Mesh Network - Nanobot Phalanx
 Enables distributed communication between VENOM nodes
+
+Features:
+- FIFO Queue-based message delivery
+- Adaptive delay: 0.3ms if queue > 100, else 1ms
+- Broadcast to all nanobots except sender
+- Direct anomaly and ml_weight injection into genome
 """
 import json
 import socket
 import threading
 import time
+import queue
 from typing import Dict, Any, List, Optional, Callable
 import logging
 
@@ -14,16 +21,20 @@ logger = logging.getLogger(__name__)
 
 class P2PMesh:
     """
-    Peer-to-peer mesh network for distributed VENOM nodes
-    Enables communication and synchronization across multiple instances
+    P2P Nanobot Phalanx mesh network for distributed VENOM nodes
+    
+    Features:
+    - FIFO Queue for message management
+    - Adaptive delivery delay (0.3ms if qlen > 100, else 1ms)
+    - Broadcast capability excluding sender
     """
     
     def __init__(self, node_id: str, host: str = "127.0.0.1", port: int = 0):
         """
-        Initialize P2P mesh node
+        Initialize P2P mesh node (nanobot)
         
         Args:
-            node_id: Unique identifier for this node
+            node_id: Unique identifier for this nanobot
             host: Host address to bind to
             port: Port to bind to (0 for random available port)
         """
@@ -34,12 +45,21 @@ class P2PMesh:
         self.peers: Dict[str, Dict[str, Any]] = {}
         self.message_handlers: Dict[str, Callable] = {}
         
+        # FIFO Queue for messages
+        self.message_queue: queue.Queue = queue.Queue()
+        
+        # Adaptive delay thresholds
+        self.QUEUE_THRESHOLD = 100
+        self.DELAY_HIGH_QUEUE = 0.0003  # 0.3ms
+        self.DELAY_LOW_QUEUE = 0.001    # 1ms
+        
         self.socket: Optional[socket.socket] = None
         self.running = False
         self.listener_thread: Optional[threading.Thread] = None
+        self.delivery_thread: Optional[threading.Thread] = None
         
     def start(self):
-        """Start the P2P mesh node"""
+        """Start the P2P mesh nanobot"""
         if self.running:
             return
             
@@ -59,10 +79,14 @@ class P2PMesh:
         self.listener_thread = threading.Thread(target=self._listen_for_connections, daemon=True)
         self.listener_thread.start()
         
-        logger.info(f"P2P node {self.node_id} started on {self.host}:{self.port}")
+        # Start adaptive delivery thread
+        self.delivery_thread = threading.Thread(target=self._adaptive_delivery, daemon=True)
+        self.delivery_thread.start()
+        
+        logger.info(f"P2P nanobot {self.node_id} started on {self.host}:{self.port}")
         
     def stop(self):
-        """Stop the P2P mesh node"""
+        """Stop the P2P mesh nanobot"""
         if not self.running:
             return
             
@@ -74,7 +98,48 @@ class P2PMesh:
         if self.listener_thread:
             self.listener_thread.join(timeout=1.0)
             
-        logger.info(f"P2P node {self.node_id} stopped")
+        if self.delivery_thread:
+            self.delivery_thread.join(timeout=1.0)
+            
+        logger.info(f"P2P nanobot {self.node_id} stopped")
+    
+    def _adaptive_delivery(self):
+        """
+        Adaptive delivery daemon thread
+        Delivers messages from queue with adaptive delay based on queue length
+        """
+        while self.running:
+            try:
+                # Check queue length for adaptive delay
+                qlen = self.message_queue.qsize()
+                
+                # Adaptive delay: 0.3ms if qlen > 100, else 1ms
+                if qlen > self.QUEUE_THRESHOLD:
+                    delay = self.DELAY_HIGH_QUEUE
+                else:
+                    delay = self.DELAY_LOW_QUEUE
+                
+                # Try to get message with timeout
+                try:
+                    message = self.message_queue.get(timeout=delay)
+                    self._deliver_message(message)
+                    self.message_queue.task_done()
+                except queue.Empty:
+                    pass
+                    
+            except Exception as e:
+                if self.running:
+                    logger.error(f"Error in adaptive delivery: {e}")
+    
+    def _deliver_message(self, message: Dict[str, Any]):
+        """Deliver a single message (process handlers)"""
+        msg_type = message.get("type")
+        if msg_type in self.message_handlers:
+            try:
+                handler = self.message_handlers[msg_type]
+                handler(message)
+            except Exception as e:
+                logger.error(f"Error in message handler for {msg_type}: {e}")
         
     def _listen_for_connections(self):
         """Listen for incoming connections"""
@@ -124,7 +189,7 @@ class P2PMesh:
             client_socket.close()
             
     def _process_message(self, message: Dict[str, Any], sender_address: tuple):
-        """Process received message"""
+        """Process received message and add to queue"""
         msg_type = message.get("type")
         
         if msg_type == "peer_discovery":
@@ -137,15 +202,10 @@ class P2PMesh:
                     "last_seen": time.time(),
                     "data": message.get("data", {})
                 }
-                logger.info(f"Peer {peer_id} discovered")
-                
-        elif msg_type in self.message_handlers:
-            # Call registered handler
-            handler = self.message_handlers[msg_type]
-            try:
-                handler(message)
-            except Exception as e:
-                logger.error(f"Error in message handler for {msg_type}: {e}")
+                logger.info(f"Nanobot peer {peer_id} discovered")
+        else:
+            # Add message to queue for adaptive delivery
+            self.message_queue.put(message)
                 
     def register_handler(self, message_type: str, handler: Callable):
         """
@@ -197,15 +257,40 @@ class P2PMesh:
             
     def broadcast(self, message: Dict[str, Any]):
         """
-        Broadcast message to all peers
+        Broadcast message to all nanobots except sender
         
         Args:
             message: Message to broadcast
         """
         message["sender_id"] = self.node_id
         
+        # Broadcast to all peers except self
         for peer_id in list(self.peers.keys()):
-            self.send_to_peer(peer_id, message)
+            if peer_id != self.node_id:
+                self.send_to_peer(peer_id, message)
+    
+    def inject_data(self, genome: Dict[str, Any], anoms: Optional[int] = None, 
+                    ml_weight: Optional[float] = None):
+        """
+        Inject anomalies or ML weight directly into genome
+        Simulates distributed risk injection
+        
+        Args:
+            genome: Genome dictionary to update
+            anoms: Number of anomalies to inject
+            ml_weight: ML weight to inject
+        """
+        if anoms is not None:
+            if "risk" not in genome:
+                genome["risk"] = {}
+            genome["risk"]["anoms"] = genome["risk"].get("anoms", 0) + anoms
+            logger.debug(f"Injected {anoms} anomalies into genome")
+        
+        if ml_weight is not None:
+            if "ml" not in genome:
+                genome["ml"] = {}
+            genome["ml"]["ml_weight"] = ml_weight
+            logger.debug(f"Injected ml_weight {ml_weight} into genome")
             
     def discover_peer(self, host: str, port: int, peer_data: Optional[Dict[str, Any]] = None):
         """

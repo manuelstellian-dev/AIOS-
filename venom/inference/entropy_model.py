@@ -1,141 +1,109 @@
 """
-Entropy Model - Torch-based inference for entropy calculation
-Infers entropy levels from system state for E flow
+Entropy Model - Torch-based inference for threat scoring
+Simple Linear(1, 1) model with Sigmoid activation
+Infers threat score bounded in [0, 1] from anomaly count
+
+Model: torch.nn.Linear(1, 1) with Sigmoid
+Input: total_anoms (anomalies from features + genome risk)
+Output: threat_score in [0, 1]
 """
 import torch
 import torch.nn as nn
-from typing import Dict, Any, Optional
-import numpy as np
+from typing import Optional
+import math
 
 
 class EntropyModel(nn.Module):
     """
-    Neural network model for entropy inference
-    Uses Torch to predict system entropy from flow states
+    Simple neural network model for threat/entropy inference
+    Uses Torch Linear(1, 1) + Sigmoid to predict threat score
+    
+    Architecture: Input(1) -> Linear(1, 1) -> Sigmoid -> Output(1)
     """
     
-    def __init__(self, input_dim: int = 8, hidden_dim: int = 32):
+    def __init__(self, ml_weight: float = 0.12):
         """
         Initialize entropy inference model
         
         Args:
-            input_dim: Input feature dimension
-            hidden_dim: Hidden layer dimension
+            ml_weight: Initial ML weight for the model (default 0.12)
         """
         super(EntropyModel, self).__init__()
         
-        self.network = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.Tanh(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.Tanh(),
-            nn.Linear(hidden_dim, 1),
-            nn.Sigmoid()  # Output entropy between 0 and 1
-        )
+        # Simple Linear(1, 1) model as specified
+        self.model = nn.Linear(1, 1)
         
-        self.input_dim = input_dim
+        # Initialize weight with ml_weight
+        self.model.weight.data.fill_(ml_weight)
+        self.model.bias.data.fill_(0.0)
+        
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
         
-        # Initialize with random weights
-        self._initialize_weights()
-        
-    def _initialize_weights(self):
-        """Initialize network weights"""
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight)
-                nn.init.zeros_(m.bias)
+        self.ml_weight = ml_weight
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Forward pass through the network
         
         Args:
-            x: Input tensor of shape (batch_size, input_dim)
+            x: Input tensor of shape (batch_size, 1) - total anomalies
             
         Returns:
-            Entropy predictions of shape (batch_size, 1)
+            Threat score predictions of shape (batch_size, 1) bounded in [0, 1]
         """
-        return self.network(x)
+        # Linear transformation followed by Sigmoid
+        return torch.sigmoid(self.model(x))
     
-    def infer_entropy(self, flow_states: Dict[str, Any]) -> float:
+    def infer_threat(self, total_anoms: int) -> float:
         """
-        Infer entropy from flow states
+        Infer threat score from total anomaly count
         
         Args:
-            flow_states: Dictionary containing states from R, B, E, O flows
+            total_anoms: Total number of anomalies (features + genome risk)
             
         Returns:
-            Inferred entropy value
+            Threat score bounded in [0, 1]
         """
-        # Extract features from flow states
-        features = self._extract_features(flow_states)
+        # Convert anomalies to tensor
+        x = torch.tensor([[float(total_anoms)]], dtype=torch.float32, device=self.device)
         
-        # Convert to tensor
-        x = torch.tensor(features, dtype=torch.float32, device=self.device).unsqueeze(0)
-        
-        # Inference
+        # Inference with no gradient
         with torch.no_grad():
-            entropy = self.forward(x)
+            threat_score = self.forward(x)
             
-        return entropy.item()
+        return threat_score.item()
     
-    def _extract_features(self, flow_states: Dict[str, Any]) -> np.ndarray:
+    def update_weight(self, new_ml_weight: float):
         """
-        Extract feature vector from flow states
+        Update the ML weight of the model
         
         Args:
-            flow_states: Dictionary with flow states
-            
-        Returns:
-            Feature vector as numpy array
+            new_ml_weight: New weight value to set
         """
-        features = np.zeros(self.input_dim, dtype=np.float32)
-        
-        # Extract R flow features
-        if "R" in flow_states:
-            features[0] = flow_states["R"].get("recursion_depth", 0.0) / 100.0
-            features[1] = flow_states["R"].get("reflection_state", 0.0)
-            
-        # Extract B flow features
-        if "B" in flow_states:
-            features[2] = flow_states["B"].get("balance", 0.0)
-            features[3] = float(flow_states["B"].get("binary_state", 0))
-            
-        # Extract E flow features
-        if "E" in flow_states:
-            features[4] = flow_states["E"].get("entropy_level", 0.0)
-            features[5] = flow_states["E"].get("energy_state", 0.0)
-            
-        # Extract O flow features
-        if "O" in flow_states:
-            features[6] = flow_states["O"].get("optimization_weight", 1.0) / 10.0
-            features[7] = flow_states["O"].get("orchestration_factor", 0.0)
-            
-        return features
+        self.ml_weight = new_ml_weight
+        self.model.weight.data.fill_(new_ml_weight)
     
-    def train_step(self, flow_states: Dict[str, Any], target_entropy: float, 
+    def train_step(self, total_anoms: int, target_threat: float, 
                    optimizer: torch.optim.Optimizer) -> float:
         """
-        Perform one training step
+        Perform one training step using MSE loss
         
         Args:
-            flow_states: Input flow states
-            target_entropy: Target entropy value
+            total_anoms: Input anomaly count
+            target_threat: Target threat score
             optimizer: Optimizer instance
             
         Returns:
-            Training loss
+            Training loss (MSE)
         """
-        features = self._extract_features(flow_states)
-        x = torch.tensor(features, dtype=torch.float32, device=self.device).unsqueeze(0)
-        target = torch.tensor([[target_entropy]], dtype=torch.float32, device=self.device)
+        x = torch.tensor([[float(total_anoms)]], dtype=torch.float32, device=self.device)
+        target = torch.tensor([[target_threat]], dtype=torch.float32, device=self.device)
         
         # Forward pass
         pred = self.forward(x)
         
-        # Compute loss
+        # Compute MSE loss
         loss = nn.functional.mse_loss(pred, target)
         
         # Backward pass
@@ -144,3 +112,11 @@ class EntropyModel(nn.Module):
         optimizer.step()
         
         return loss.item()
+    
+    def get_weight(self) -> float:
+        """Get current model weight"""
+        return self.model.weight.data.item()
+    
+    def get_bias(self) -> float:
+        """Get current model bias"""
+        return self.model.bias.data.item()
