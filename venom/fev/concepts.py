@@ -246,3 +246,107 @@ PHYSICS_BATCH_2 = [
         "prior_p0": 1.0
     }
 ]
+
+# Batch 3: Biology Domain (10 concepts)
+BIOLOGY_BATCH_3 = [
+    {
+        "id": "BIO_001",
+        "domain": "Biology",
+        "topic": "DNA Structure",
+        "formal": "Double helix: A-T, G-C base pairing",
+        "relations": ["MATH_001", "PHYS_004"],
+        "confidence": 1.0,
+        "source": "Molecular Biology",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_002",
+        "domain": "Biology",
+        "topic": "Central Dogma",
+        "formal": "DNA → RNA → Protein",
+        "relations": ["BIO_001", "MATH_003"],
+        "confidence": 1.0,
+        "source": "Molecular Biology",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_003",
+        "domain": "Biology",
+        "topic": "Evolution by Natural Selection",
+        "formal": "Variation + Selection + Inheritance → Evolution",
+        "relations": ["MATH_008", "PHYS_004"],
+        "confidence": 1.0,
+        "source": "Evolutionary Biology",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_004",
+        "domain": "Biology",
+        "topic": "Cell Theory",
+        "formal": "All life from cells; cell is unit of life",
+        "relations": ["MATH_001"],
+        "confidence": 1.0,
+        "source": "Cell Biology",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_005",
+        "domain": "Biology",
+        "topic": "Mendel's Laws",
+        "formal": "Segregation + Independent Assortment",
+        "relations": ["BIO_001", "MATH_008"],
+        "confidence": 1.0,
+        "source": "Genetics",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_006",
+        "domain": "Biology",
+        "topic": "Krebs Cycle",
+        "formal": "Acetyl-CoA → CO₂ + ATP + NADH + FADH₂",
+        "relations": ["PHYS_004", "PHYS_008"],
+        "confidence": 1.0,
+        "source": "Biochemistry",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_007",
+        "domain": "Biology",
+        "topic": "Photosynthesis",
+        "formal": "6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂",
+        "relations": ["PHYS_004", "MATH_003"],
+        "confidence": 1.0,
+        "source": "Plant Biology",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_008",
+        "domain": "Biology",
+        "topic": "Homeostasis",
+        "formal": "Negative feedback maintains equilibrium",
+        "relations": ["MATH_001", "PHYS_001"],
+        "confidence": 1.0,
+        "source": "Physiology",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_009",
+        "domain": "Biology",
+        "topic": "Ecosystem Energy Flow",
+        "formal": "Sun → Producers → Consumers → Decomposers",
+        "relations": ["PHYS_004", "BIO_007"],
+        "confidence": 1.0,
+        "source": "Ecology",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "BIO_010",
+        "domain": "Biology",
+        "topic": "Hardy-Weinberg Equilibrium",
+        "formal": "p² + 2pq + q² = 1 (allele frequencies)",
+        "relations": ["MATH_001", "MATH_002", "BIO_003"],
+        "confidence": 1.0,
+        "source": "Population Genetics",
+        "prior_p0": 1.0
+    }
+]
