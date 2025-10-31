@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  venom:
+    build: .
+    image: venom:latest
+    container_name: venom-genesis
+    command: python main.py --beats 100
+    ports:
+      - "8000:8000"  # Metrics/Health endpoint
+    environment:
+      - LOG_LEVEL=INFO
+      - K_FLOWS=4
+      - P_NODES=5
+      - T_THRESHOLD=0.02
+    volumes:
+      - venom-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: venom-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    depends_on:
+      - venom
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: venom-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=venom
+      - GF_SECURITY_ADMIN_USER=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+volumes:
+  venom-data:
+  prometheus-data:
+  grafana-data:
