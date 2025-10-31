@@ -49,6 +49,12 @@ VENOM Λ-GENESIS is a **fractal organism** with Lyapunov stability (ΔV < 0) and
    - Broadcast to all nanobots except sender
    - Direct anomaly/ml_weight injection into genome
 
+8. **Observability** - Monitoring & Health Checks
+   - **Prometheus Metrics**: Counters, gauges, histograms for all components
+   - **Health Checks**: Readiness and liveness probes for K8s
+   - **MetricsServer**: HTTP endpoints on port 8000 (/metrics, /health)
+   - Thread-safe metrics collection with zero performance impact
+
 ## Installation
 
 ```bash
@@ -246,16 +252,98 @@ AIOS-/
 │   │   └── entropy_model.py  # Torch entropy model
 │   ├── ledger/            # Blockchain
 │   │   └── immutable_ledger.py  # SHA3 ledger
-│   └── mesh/              # Networking
-│       └── p2p.py         # P2P mesh
+│   ├── mesh/              # Networking
+│   │   └── p2p.py         # P2P mesh
+│   └── observability/     # Monitoring & Health
+│       ├── metrics.py     # Prometheus metrics
+│       └── health.py      # Health checks
 ├── k8s/                   # Kubernetes configs
 │   ├── deployment.yaml    # Deployment + HPA + ConfigMap
 │   └── svc.yaml          # LoadBalancer service
+├── .github/workflows/     # CI/CD
+│   └── ci.yml            # GitHub Actions workflow
+├── tests/                 # Test suite (34 tests)
+│   ├── test_pulse.py      # T_Λ pulse tests
+│   ├── test_pid.py        # PID controller tests
+│   ├── test_ledger.py     # Ledger tests
+│   └── test_integration.py # Integration tests
 ├── main.py               # Main entry point
 ├── example.py            # Usage example
 ├── Dockerfile            # Container image
+├── docker-compose.yml    # Local dev environment
+├── prometheus.yml        # Prometheus config
 ├── requirements.txt      # Python dependencies
 └── README.md            # This file
+```
+
+## Docker Compose (Local Development)
+
+Run complete stack with Prometheus and Grafana:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f venom
+
+# Access services
+# - VENOM metrics: http://localhost:8000/metrics
+# - Prometheus: http://localhost:9090
+# - Grafana: http://localhost:3000 (admin/venom)
+
+# Stop services
+docker-compose down
+```
+
+## CI/CD with GitHub Actions
+
+Automated testing and validation on every push:
+
+**Workflows:**
+- **Unit Tests**: Run on Python 3.9, 3.10, 3.11, 3.12
+- **Integration Tests**: Full system orchestration tests
+- **Docker Build**: Validate container image builds
+- **Code Coverage**: Upload to Codecov
+
+**Status:** [![CI](https://github.com/manuelstellian-dev/AIOS-/actions/workflows/ci.yml/badge.svg)](https://github.com/manuelstellian-dev/AIOS-/actions/workflows/ci.yml)
+
+## Observability & Monitoring
+
+### Prometheus Metrics
+
+VENOM exports comprehensive metrics on `/metrics` endpoint:
+
+```
+# Counters
+venom_beats_total                     # Total beats executed
+venom_decisions_total{action="..."}   # Decisions by action type
+venom_core_executions_total{core="..."} # Core executions
+
+# Gauges
+venom_threat_score                    # Current threat level [0-1]
+venom_pid_error                       # PID error (ΔT)
+venom_pid_integral                    # PID integral component
+venom_genome_weight_o                 # O weight value
+venom_ledger_chain_length             # Ledger entries
+venom_mesh_peers_connected            # Connected P2P peers
+
+# Histograms
+venom_beat_duration_seconds           # Beat execution time
+venom_core_duration_seconds{core="..."} # Per-core execution time
+```
+
+### Health Checks
+
+```bash
+# Readiness probe (K8s)
+curl http://localhost:8000/health
+
+# Response
+{"status":"healthy"}
+
+# Detailed health check
+python -c "from venom.observability import HealthChecker; ..."
 ```
 
 ## Contributing
