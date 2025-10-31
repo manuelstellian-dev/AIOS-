@@ -4,7 +4,7 @@ Provides real-time data ingestion and anomaly detection
 """
 
 import logging
-from typing import List, Dict, Callable, Optional
+from typing import List, Dict, Callable, Optional, Any
 from collections import deque
 import statistics
 
@@ -106,7 +106,7 @@ class StreamProcessor:
             except Exception as e:
                 logger.error(f"Error in anomaly handler {handler.__name__}: {e}")
     
-    def get_stats(self) -> Dict[str, any]:
+    def get_stats(self) -> Dict[str, Any]:
         """
         Get rolling window statistics
         

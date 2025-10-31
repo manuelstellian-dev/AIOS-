@@ -4,7 +4,7 @@ Provides access to CUDA GPU information with graceful fallback
 """
 
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class CUDABridge:
             logger.error(f"Failed to get GPU count: {e}")
             return 0
     
-    def get_gpu_info(self, device_id: int = 0) -> Dict[str, any]:
+    def get_gpu_info(self, device_id: int = 0) -> Dict[str, Any]:
         """
         Get information about a specific GPU
         Returns dict with name, compute capability, total memory

@@ -4,7 +4,7 @@ Fractal deployment to edge nodes with T_Λ compression
 """
 
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class EdgeDeployer:
             logger.error(f"Failed to deploy to node {node_id}")
             return None
     
-    def get_cluster_stats(self) -> Dict[str, any]:
+    def get_cluster_stats(self) -> Dict[str, Any]:
         """
         Get cluster-wide statistics
         Returns dict with total resources, active nodes, deployments count
