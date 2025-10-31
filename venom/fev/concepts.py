@@ -350,3 +350,107 @@ BIOLOGY_BATCH_3 = [
         "prior_p0": 1.0
     }
 ]
+
+# Batch 4: Chemistry Domain (10 concepts - Completes 40 total!)
+CHEMISTRY_BATCH_4 = [
+    {
+        "id": "CHEM_001",
+        "domain": "Chemistry",
+        "topic": "Periodic Table Organization",
+        "formal": "Elements organized by Z (atomic number)",
+        "relations": ["MATH_001", "MATH_008"],
+        "confidence": 1.0,
+        "source": "Periodic Law",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_002",
+        "domain": "Chemistry",
+        "topic": "Atomic Structure",
+        "formal": "Atom = nucleus (p⁺, n⁰) + electron cloud (e⁻)",
+        "relations": ["PHYS_007", "MATH_001"],
+        "confidence": 1.0,
+        "source": "Quantum Atomic Model",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_003",
+        "domain": "Chemistry",
+        "topic": "Chemical Bonding (Ionic)",
+        "formal": "Metal + Nonmetal → e⁻ transfer → M⁺X⁻",
+        "relations": ["CHEM_002", "PHYS_004"],
+        "confidence": 1.0,
+        "source": "Ionic Theory",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_004",
+        "domain": "Chemistry",
+        "topic": "Chemical Bonding (Covalent)",
+        "formal": "Nonmetal + Nonmetal → e⁻ sharing",
+        "relations": ["CHEM_002", "PHYS_007"],
+        "confidence": 1.0,
+        "source": "Molecular Orbital Theory",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_005",
+        "domain": "Chemistry",
+        "topic": "Stoichiometry",
+        "formal": "aA + bB → cC + dD (balanced equation)",
+        "relations": ["MATH_003", "MATH_004", "CHEM_001"],
+        "confidence": 1.0,
+        "source": "Law of Conservation of Mass",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_006",
+        "domain": "Chemistry",
+        "topic": "Thermochemistry",
+        "formal": "ΔH = H_products - H_reactants",
+        "relations": ["PHYS_004", "PHYS_008", "CHEM_005"],
+        "confidence": 1.0,
+        "source": "Hess's Law",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_007",
+        "domain": "Chemistry",
+        "topic": "Acids and Bases",
+        "formal": "pH = -log[H⁺]; pH + pOH = 14",
+        "relations": ["MATH_001", "CHEM_005"],
+        "confidence": 1.0,
+        "source": "Arrhenius/Brønsted-Lowry Theory",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_008",
+        "domain": "Chemistry",
+        "topic": "Redox Reactions",
+        "formal": "Oxidation (e⁻ loss) + Reduction (e⁻ gain)",
+        "relations": ["CHEM_002", "CHEM_005", "PHYS_004"],
+        "confidence": 1.0,
+        "source": "Electron Transfer Theory",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_009",
+        "domain": "Chemistry",
+        "topic": "Organic Chemistry",
+        "formal": "Carbon chains + functional groups",
+        "relations": ["CHEM_004", "BIO_001", "BIO_002"],
+        "confidence": 1.0,
+        "source": "Organic Molecular Theory",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "CHEM_010",
+        "domain": "Chemistry",
+        "topic": "Chemical Equilibrium",
+        "formal": "K_eq = [C]^c[D]^d / [A]^a[B]^b at equilibrium",
+        "relations": ["MATH_001", "CHEM_005", "PHYS_008"],
+        "confidence": 1.0,
+        "source": "Le Chatelier's Principle",
+        "prior_p0": 1.0
+    }
+]
