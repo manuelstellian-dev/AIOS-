@@ -15,6 +15,11 @@ from venom import (
     ImmutableLedger,
     P2PMesh
 )
+from venom.ops.backup import BackupManager
+from venom.ops.shutdown import GracefulShutdown
+from venom.ops.audit import AuditTrail
+from venom.security.signing import LedgerSigner
+from venom.security.auth import MeshAuthenticator
 
 # Configure logging
 logging.basicConfig(
@@ -46,6 +51,22 @@ def main():
     parser.add_argument('--mesh-port', type=int, default=9000,
                        help='P2P mesh port')
     
+    # Stage 1 features
+    parser.add_argument('--enable-backup', action='store_true',
+                       help='Enable automatic ledger backups')
+    parser.add_argument('--backup-dir', type=str, default='./backups',
+                       help='Backup directory')
+    parser.add_argument('--sign-ledger', action='store_true',
+                       help='Enable Ed25519 ledger signing')
+    parser.add_argument('--mesh-auth', action='store_true',
+                       help='Enable JWT mesh authentication')
+    parser.add_argument('--mesh-secret', type=str, default='venom-secret-key',
+                       help='Secret key for mesh authentication')
+    parser.add_argument('--audit-trail', action='store_true',
+                       help='Enable structured audit logging')
+    parser.add_argument('--audit-file', type=str, default='./audit.jsonl',
+                       help='Audit log file')
+    
     args = parser.parse_args()
     
     logger.info("=" * 60)
@@ -58,6 +79,10 @@ def main():
     logger.info(f"  T1: {args.t1}")
     logger.info(f"  T_threshold: {args.t_threshold}")
     logger.info(f"  Mesh enabled: {args.mesh}")
+    logger.info(f"  Backup enabled: {args.enable_backup}")
+    logger.info(f"  Ledger signing: {args.sign_ledger}")
+    logger.info(f"  Mesh auth: {args.mesh_auth}")
+    logger.info(f"  Audit trail: {args.audit_trail}")
     logger.info("=" * 60)
     
     try:
@@ -79,10 +104,26 @@ def main():
         ledger = ImmutableLedger()
         
         mesh = None
+        mesh_auth = None
         if args.mesh:
             mesh = P2PMesh(node_id="venom-node-1", port=args.mesh_port)
             mesh.start()
             logger.info(f"P2P Mesh started on port {mesh.port}")
+            
+            # Enable mesh authentication if requested
+            if args.mesh_auth:
+                mesh_auth = MeshAuthenticator(secret=args.mesh_secret)
+                logger.info("Mesh authentication enabled")
+        
+        # Initialize Stage 1 features
+        backup_mgr = BackupManager(ledger, backup_dir=args.backup_dir, enabled=args.enable_backup)
+        
+        signer = None
+        if args.sign_ledger:
+            signer = LedgerSigner()
+            logger.info(f"Ledger signing enabled (public key: {signer.get_public_key_hex()[:16]}...)")
+        
+        audit = AuditTrail(enabled=args.audit_trail, audit_file=args.audit_file if args.audit_trail else None)
         
         # Create Arbiter
         arbiter = Arbiter(
@@ -92,6 +133,9 @@ def main():
             ledger=ledger,
             mesh=mesh
         )
+        
+        # Register graceful shutdown
+        shutdown_handler = GracefulShutdown(arbiter)
         
         # Start execution
         logger.info("Starting Arbiter execution...")

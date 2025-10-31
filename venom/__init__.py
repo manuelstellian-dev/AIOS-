@@ -11,9 +11,11 @@ Architecture:
 - Immutable Ledger: SHA3-256 blockchain with Merkle root
 - P2P Mesh: Nanobot Phalanx with adaptive FIFO delivery
 - Observability: Prometheus metrics, health checks, monitoring
+- Operations: Backup/restore, graceful shutdown, audit trails
+- Security: Ed25519 signing, JWT authentication
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .core.arbiter import Arbiter, Action
 from .core.constants import Constants
@@ -25,6 +27,8 @@ from .inference.entropy_model import EntropyModel
 from .ledger.immutable_ledger import ImmutableLedger, LedgerEntry
 from .mesh.p2p import P2PMesh
 from .observability import MetricsCollector, MetricsServer, HealthChecker
+from .ops import BackupManager, AuditTrail
+from .security import LedgerSigner, MeshAuthenticator
 
 __all__ = [
     "Arbiter",
@@ -47,4 +51,8 @@ __all__ = [
     "MetricsCollector",
     "MetricsServer",
     "HealthChecker",
+    "BackupManager",
+    "AuditTrail",
+    "LedgerSigner",
+    "MeshAuthenticator",
 ]
