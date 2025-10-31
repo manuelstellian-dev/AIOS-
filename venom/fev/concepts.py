@@ -142,3 +142,107 @@ MATH_BATCH_1 = [
         "prior_p0": 1.0
     }
 ]
+
+# Batch 2: Physics Domain (10 concepts)
+PHYSICS_BATCH_2 = [
+    {
+        "id": "PHYS_001",
+        "domain": "Physics",
+        "topic": "Newton's First Law",
+        "formal": "F_net = 0 → v = constant",
+        "relations": ["MATH_001"],
+        "confidence": 1.0,
+        "source": "Classical Mechanics",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_002",
+        "domain": "Physics",
+        "topic": "Newton's Second Law",
+        "formal": "F = ma",
+        "relations": ["PHYS_001", "MATH_003"],
+        "confidence": 1.0,
+        "source": "Classical Mechanics",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_003",
+        "domain": "Physics",
+        "topic": "Newton's Third Law",
+        "formal": "F_AB = -F_BA",
+        "relations": ["PHYS_002"],
+        "confidence": 1.0,
+        "source": "Classical Mechanics",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_004",
+        "domain": "Physics",
+        "topic": "Conservation of Energy",
+        "formal": "E_total = constant",
+        "relations": ["MATH_001", "MATH_010"],
+        "confidence": 1.0,
+        "source": "Thermodynamics",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_005",
+        "domain": "Physics",
+        "topic": "Conservation of Momentum",
+        "formal": "Σp_i = constant",
+        "relations": ["PHYS_002", "MATH_001"],
+        "confidence": 1.0,
+        "source": "Classical Mechanics",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_006",
+        "domain": "Physics",
+        "topic": "Einstein's Mass-Energy Equivalence",
+        "formal": "E = mc²",
+        "relations": ["PHYS_004", "MATH_002"],
+        "confidence": 1.0,
+        "source": "Special Relativity",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_007",
+        "domain": "Physics",
+        "topic": "Heisenberg Uncertainty Principle",
+        "formal": "Δx·Δp ≥ ℏ/2",
+        "relations": ["MATH_001"],
+        "confidence": 1.0,
+        "source": "Quantum Mechanics",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_008",
+        "domain": "Physics",
+        "topic": "First Law of Thermodynamics",
+        "formal": "ΔU = Q - W",
+        "relations": ["PHYS_004"],
+        "confidence": 1.0,
+        "source": "Thermodynamics",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_009",
+        "domain": "Physics",
+        "topic": "Maxwell's Equations (Gauss's Law)",
+        "formal": "∇·E = ρ/ε₀",
+        "relations": ["MATH_010"],
+        "confidence": 1.0,
+        "source": "Electromagnetism",
+        "prior_p0": 1.0
+    },
+    {
+        "id": "PHYS_010",
+        "domain": "Physics",
+        "topic": "Schrödinger Equation",
+        "formal": "iℏ∂ψ/∂t = Ĥψ",
+        "relations": ["PHYS_007", "MATH_010"],
+        "confidence": 1.0,
+        "source": "Quantum Mechanics",
+        "prior_p0": 1.0
+    }
+]
