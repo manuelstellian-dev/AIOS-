@@ -26,6 +26,9 @@ class MultiRegionManager:
     Manages deployments across geographic regions with failover and intelligent routing
     """
     
+    # Geographic calculation constants
+    EARTH_RADIUS_KM = 6371
+    
     def __init__(self):
         self.regions: Dict[str, Region] = {}
         self.deployments: Dict[str, str] = {}  # deployment_id -> region_id
@@ -165,8 +168,6 @@ class MultiRegionManager:
         Returns:
             Distance in kilometers
         """
-        R = 6371  # Earth radius in kilometers
-        
         # Convert to radians
         lat1_rad = math.radians(lat1)
         lat2_rad = math.radians(lat2)
@@ -179,7 +180,7 @@ class MultiRegionManager:
              math.sin(delta_lon / 2) ** 2)
         c = 2 * math.asin(math.sqrt(a))
         
-        return R * c
+        return self.EARTH_RADIUS_KM * c
     
     def get_region_status(self, region_id: str) -> Optional[str]:
         """

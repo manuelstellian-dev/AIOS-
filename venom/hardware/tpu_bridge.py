@@ -15,6 +15,10 @@ class TPUBridge:
     Gracefully falls back to simulated values if TPU is unavailable
     """
     
+    # TPU device constants
+    TPU_CORES_PER_DEVICE = 2
+    TPU_MEMORY_GB_PER_DEVICE = 16
+    
     def __init__(self):
         self.available = False
         self.jax = None
@@ -75,8 +79,8 @@ class TPUBridge:
             return {
                 "device_id": device_id,
                 "version": "v3",
-                "cores": 2,
-                "memory_gb": 16,
+                "cores": self.TPU_CORES_PER_DEVICE,
+                "memory_gb": self.TPU_MEMORY_GB_PER_DEVICE,
                 "architecture": "simulated",
                 "simulated": True
             }
@@ -92,8 +96,8 @@ class TPUBridge:
             return {
                 "device_id": device_id,
                 "version": self._extract_tpu_version(device),
-                "cores": 2,  # TPU cores per device
-                "memory_gb": 16,  # Approximate HBM per device
+                "cores": self.TPU_CORES_PER_DEVICE,
+                "memory_gb": self.TPU_MEMORY_GB_PER_DEVICE,
                 "architecture": str(device.device_kind),
                 "simulated": False
             }
@@ -219,7 +223,7 @@ class TPUBridge:
             # JAX doesn't expose detailed memory stats like CUDA
             # Return estimated values based on device count
             device_count = self.get_tpu_count()
-            total_gb = device_count * 16  # Approximate HBM per device
+            total_gb = device_count * self.TPU_MEMORY_GB_PER_DEVICE
             
             return {
                 "total_gb": total_gb,

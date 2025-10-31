@@ -15,6 +15,13 @@ class PredictiveModel:
     Uses simple linear regression on historical data
     """
     
+    # Confidence interval constants (simplified t-values for small samples)
+    T_VALUE_95_CONFIDENCE = 2.0
+    T_VALUE_90_CONFIDENCE = 1.5
+    
+    # Trend detection threshold
+    TREND_STABILITY_THRESHOLD = 0.01
+    
     def __init__(self):
         self.history: List[Tuple[float, float]] = []  # (timestamp, value) pairs
         self.slope: Optional[float] = None
@@ -128,9 +135,8 @@ class PredictiveModel:
                 x_mean = statistics.mean(x_values)
                 x_variance = sum((x - x_mean) ** 2 for x in x_values)
                 
-                # Prediction interval
-                # Using simplified t-value of 2 for 95% confidence
-                t_value = 2.0 if confidence_level >= 0.95 else 1.5
+                # Prediction interval using simplified t-values
+                t_value = self.T_VALUE_95_CONFIDENCE if confidence_level >= 0.95 else self.T_VALUE_90_CONFIDENCE
                 
                 margin = t_value * standard_error * (1 + 1/n + (timestamp - x_mean)**2 / x_variance) ** 0.5
                 
@@ -160,10 +166,7 @@ class PredictiveModel:
             return None
         
         try:
-            # Define threshold for "stable" trend
-            threshold = 0.01
-            
-            if abs(self.slope) < threshold:
+            if abs(self.slope) < self.TREND_STABILITY_THRESHOLD:
                 trend = "stable"
             elif self.slope > 0:
                 trend = "increasing"
