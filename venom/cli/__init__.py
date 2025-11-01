@@ -1,3 +1,5 @@
 """CLI tools."""
 from venom.cli.dashboard import CLIDashboard
-__all__ = ['CLIDashboard']
+from venom.cli.main import main
+
+__all__ = ['CLIDashboard', 'main']
