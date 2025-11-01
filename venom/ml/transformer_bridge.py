@@ -39,6 +39,7 @@ class TransformerBridge:
         self.cache_dir = cache_dir
         self._model_cache = {}
         self._pipeline_cache = {}
+        self.models = {}  # Public models dict for test compatibility
         
         # Check if transformers is available
         try:
@@ -104,6 +105,8 @@ class TransformerBridge:
                 cache_dir=self.cache_dir
             )
             self._pipeline_cache[cache_key] = pipeline
+            # Also track in public models dict for test compatibility
+            self.models[model_name] = pipeline
             return pipeline
         except Exception as e:
             raise RuntimeError(
@@ -222,3 +225,175 @@ class TransformerBridge:
             True if transformers is installed, False otherwise
         """
         return self.transformers_available
+    
+    def tokenize(self, text: str, model_name: Optional[str] = None, **kwargs) -> Optional[List[int]]:
+        """
+        Tokenize text into tokens
+        
+        Args:
+            text: Input text to tokenize
+            model_name: Optional model name to use for tokenization (defaults to 'bert-base-uncased')
+            **kwargs: Additional arguments passed to tokenizer
+            
+        Returns:
+            List of token IDs, or None if transformers not available
+        """
+        if not self.transformers_available:
+            return None
+            
+        try:
+            # Use default model if not specified
+            if model_name is None:
+                model_name = 'bert-base-uncased'
+            
+            # Load tokenizer
+            tokenizer = self.transformers.AutoTokenizer.from_pretrained(
+                model_name, 
+                cache_dir=self.cache_dir
+            )
+            
+            # Tokenize
+            tokens = tokenizer.encode(text, **kwargs)
+            return tokens
+        except Exception as e:
+            warnings.warn(f"Tokenization failed: {e}")
+            return None
+    
+    def encode(self, text: str, model_name: Optional[str] = None, **kwargs) -> Optional[List[int]]:
+        """
+        Encode text to token IDs
+        
+        Args:
+            text: Input text to encode
+            model_name: Optional model name to use (defaults to 'bert-base-uncased')
+            **kwargs: Additional arguments passed to tokenizer
+            
+        Returns:
+            List of token IDs, or None if transformers not available
+        """
+        return self.tokenize(text, model_name, **kwargs)
+    
+    def decode(self, tokens: List[int], model_name: Optional[str] = None, **kwargs) -> Optional[str]:
+        """
+        Decode token IDs back to text
+        
+        Args:
+            tokens: List of token IDs to decode
+            model_name: Optional model name to use (defaults to 'bert-base-uncased')
+            **kwargs: Additional arguments passed to tokenizer
+            
+        Returns:
+            Decoded text string, or None if transformers not available
+        """
+        if not self.transformers_available:
+            return None
+            
+        try:
+            # Use default model if not specified
+            if model_name is None:
+                model_name = 'bert-base-uncased'
+            
+            # Load tokenizer
+            tokenizer = self.transformers.AutoTokenizer.from_pretrained(
+                model_name,
+                cache_dir=self.cache_dir
+            )
+            
+            # Decode
+            text = tokenizer.decode(tokens, **kwargs)
+            return text
+        except Exception as e:
+            warnings.warn(f"Decoding failed: {e}")
+            return None
+    
+    def get_embeddings(self, model_name: str, text: str, **kwargs) -> Optional[Any]:
+        """
+        Get text embeddings from a model
+        
+        Args:
+            model_name: Name of the model to use
+            text: Input text
+            **kwargs: Additional arguments
+            
+        Returns:
+            Text embeddings as numpy array/tensor, or None if not available
+        """
+        if not self.transformers_available:
+            return None
+            
+        try:
+            import torch
+            
+            # Load model and tokenizer
+            tokenizer = self.transformers.AutoTokenizer.from_pretrained(
+                model_name,
+                cache_dir=self.cache_dir
+            )
+            model = self.transformers.AutoModel.from_pretrained(
+                model_name,
+                cache_dir=self.cache_dir
+            )
+            
+            # Tokenize
+            inputs = tokenizer(text, return_tensors="pt", **kwargs)
+            
+            # Get embeddings
+            with torch.no_grad():
+                outputs = model(**inputs)
+                embeddings = outputs.last_hidden_state
+            
+            # Return as numpy array
+            return embeddings.numpy()
+        except Exception as e:
+            warnings.warn(f"Failed to get embeddings: {e}")
+            return None
+    
+    def list_models(self) -> List[str]:
+        """
+        List all currently loaded models
+        
+        Returns:
+            List of loaded model names
+        """
+        return list(self.models.keys())
+    
+    def unload_model(self, model_name: str) -> None:
+        """
+        Unload a specific model from memory
+        
+        Args:
+            model_name: Name of the model to unload
+        """
+        if model_name in self.models:
+            del self.models[model_name]
+        
+        # Also clean up from internal caches
+        cache_keys_to_remove = [k for k in self._pipeline_cache.keys() if k.startswith(f"{model_name}:")]
+        for key in cache_keys_to_remove:
+            del self._pipeline_cache[key]
+    
+    def clear_models(self) -> None:
+        """
+        Clear all loaded models from memory
+        """
+        self.models.clear()
+        self._model_cache.clear()
+        self._pipeline_cache.clear()
+    
+    def get_model_info(self, model_name: str) -> Optional[Dict[str, Any]]:
+        """
+        Get information about a loaded model
+        
+        Args:
+            model_name: Name of the model
+            
+        Returns:
+            Dictionary with model information, or None if model not loaded
+        """
+        if model_name in self.models:
+            return {
+                'name': model_name,
+                'loaded': True,
+                'cache_dir': self.cache_dir
+            }
+        return None
