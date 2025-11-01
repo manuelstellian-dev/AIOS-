@@ -12,10 +12,10 @@ class TransformerBridge:
     Supports text-generation, text-classification, question-answering, summarization
     """
     
-    # Supported models
+    # Supported models (using tiny models for faster testing)
     SUPPORTED_MODELS = [
-        'bert-base-uncased',
-        'gpt2',
+        'prajjwal1/bert-tiny',  # 18MB - replaces bert-base-uncased
+        'sshleifer/tiny-gpt2',  # 5MB - replaces gpt2
         't5-small',
         'distilbert-base-uncased',
         'roberta-base'
@@ -67,7 +67,7 @@ class TransformerBridge:
         Load a transformer model for a specific task
         
         Args:
-            model_name: Name of the model (e.g., 'gpt2', 'bert-base-uncased')
+            model_name: Name of the model (e.g., 'sshleifer/tiny-gpt2', 'prajjwal1/bert-tiny')
             task: Task type (text-generation, text-classification, etc.)
             
         Returns:
@@ -322,7 +322,7 @@ class TransformerBridge:
         
         Args:
             text: Text to encode
-            model_name: Optional model name to use for encoding (defaults to gpt2)
+            model_name: Optional model name to use for encoding (defaults to tiny-gpt2)
             
         Returns:
             List of token IDs or None if failed
@@ -333,8 +333,8 @@ class TransformerBridge:
         try:
             from transformers import AutoTokenizer
             
-            # Use specified model or default to gpt2
-            model_to_use = model_name or 'gpt2'
+            # Use specified model or default to tiny-gpt2
+            model_to_use = model_name or 'sshleifer/tiny-gpt2'
             
             # Check if model is already loaded
             if model_to_use in self.models:
@@ -355,7 +355,7 @@ class TransformerBridge:
         
         Args:
             tokens: List of token IDs
-            model_name: Optional model name to use for decoding (defaults to gpt2)
+            model_name: Optional model name to use for decoding (defaults to tiny-gpt2)
             
         Returns:
             Decoded text or None if failed
@@ -366,8 +366,8 @@ class TransformerBridge:
         try:
             from transformers import AutoTokenizer
             
-            # Use specified model or default to gpt2
-            model_to_use = model_name or 'gpt2'
+            # Use specified model or default to tiny-gpt2
+            model_to_use = model_name or 'sshleifer/tiny-gpt2'
             
             # Check if model is already loaded
             if model_to_use in self.models:

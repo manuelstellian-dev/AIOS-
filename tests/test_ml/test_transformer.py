@@ -14,12 +14,12 @@ def test_load_model(bridge):
     if not bridge.is_available():
         pytest.skip("transformers not available")
         
-    # Test loading a supported model
-    model = bridge.load_model('gpt2', task='text-generation')
+    # Test loading a supported model (using tiny model for fast testing)
+    model = bridge.load_model('sshleifer/tiny-gpt2', task='text-generation')
     assert model is not None
     
     # Test caching - should return same pipeline
-    model2 = bridge.load_model('gpt2', task='text-generation')
+    model2 = bridge.load_model('sshleifer/tiny-gpt2', task='text-generation')
     assert model is model2
     
     # Test unsupported model
@@ -28,7 +28,7 @@ def test_load_model(bridge):
         
     # Test unsupported task
     with pytest.raises(ValueError):
-        bridge.load_model('gpt2', task='unsupported-task')
+        bridge.load_model('sshleifer/tiny-gpt2', task='unsupported-task')
 
 
 def test_inference(bridge):
@@ -38,7 +38,7 @@ def test_inference(bridge):
         
     text = "Hello, how are you"
     result = bridge.inference(
-        model_name='gpt2',
+        model_name='sshleifer/tiny-gpt2',
         text=text,
         task='text-generation',
         max_length=20
@@ -47,7 +47,7 @@ def test_inference(bridge):
     assert 'input' in result
     assert result['input'] == text
     assert 'output' in result
-    assert result['model'] == 'gpt2'
+    assert result['model'] == 'sshleifer/tiny-gpt2'
     assert result['task'] == 'text-generation'
 
 
@@ -63,7 +63,7 @@ def test_batch_inference(bridge):
     ]
     
     results = bridge.batch_inference(
-        model_name='gpt2',
+        model_name='sshleifer/tiny-gpt2',
         texts=texts,
         task='text-generation',
         max_length=20
@@ -73,7 +73,7 @@ def test_batch_inference(bridge):
     for i, result in enumerate(results):
         assert result['input'] == texts[i]
         assert 'output' in result
-        assert result['model'] == 'gpt2'
+        assert result['model'] == 'sshleifer/tiny-gpt2'
 
 
 def test_list_models(bridge):
@@ -82,8 +82,8 @@ def test_list_models(bridge):
     
     assert isinstance(models, list)
     assert len(models) > 0
-    assert 'gpt2' in models
-    assert 'bert-base-uncased' in models
+    assert 'sshleifer/tiny-gpt2' in models
+    assert 'prajjwal1/bert-tiny' in models
     assert 't5-small' in models
 
 
@@ -99,7 +99,7 @@ def test_graceful_fallback():
     
     # Should raise when trying to use
     with pytest.raises(RuntimeError):
-        bridge.load_model('gpt2')
+        bridge.load_model('sshleifer/tiny-gpt2')
         
     with pytest.raises(RuntimeError):
-        bridge.inference("test", 'gpt2')
+        bridge.inference("test", 'sshleifer/tiny-gpt2')
