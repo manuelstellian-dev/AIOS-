@@ -196,6 +196,25 @@ class LedgerSigner:
         return public_bytes.hex()
     
     # Alias methods for backward compatibility
+    def _convert_to_bytes(self, data: Any) -> bytes:
+        """
+        Convert data to bytes for signing/verification
+        
+        Args:
+            data: Data to convert
+            
+        Returns:
+            Data as bytes
+        """
+        if isinstance(data, bytes):
+            return data
+        elif isinstance(data, str):
+            return data.encode()
+        elif isinstance(data, dict):
+            return json.dumps(data, sort_keys=True, separators=(",", ":")).encode()
+        else:
+            return str(data).encode()
+    
     def sign_data(self, data: Any) -> bytes:
         """
         Sign arbitrary data (alias for sign_entry for compatibility)
@@ -214,14 +233,7 @@ class LedgerSigner:
             raise ValueError("Cannot sign None data")
         
         # Convert data to bytes
-        if isinstance(data, bytes):
-            data_bytes = data
-        elif isinstance(data, str):
-            data_bytes = data.encode()
-        elif isinstance(data, dict):
-            data_bytes = json.dumps(data, sort_keys=True, separators=(",", ":")).encode()
-        else:
-            data_bytes = str(data).encode()
+        data_bytes = self._convert_to_bytes(data)
         
         signature = self.private_key.sign(data_bytes)
         return signature
@@ -246,14 +258,7 @@ class LedgerSigner:
         
         try:
             # Convert data to bytes
-            if isinstance(data, bytes):
-                data_bytes = data
-            elif isinstance(data, str):
-                data_bytes = data.encode()
-            elif isinstance(data, dict):
-                data_bytes = json.dumps(data, sort_keys=True, separators=(",", ":")).encode()
-            else:
-                data_bytes = str(data).encode()
+            data_bytes = self._convert_to_bytes(data)
             
             self.public_key.verify(signature, data_bytes)
             return True
