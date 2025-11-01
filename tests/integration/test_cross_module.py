@@ -18,25 +18,26 @@ class TestCoreSecurityIntegration:
         
         token = auth.generate_token("node-001")
         
-        action = Mock()
-        action.execute = Mock(return_value={"result": "success", "token": token})
-        
-        result = arbiter.execute(action)
+        # Execute a beat which executes actions
+        result = arbiter.execute_beat()
         
         assert result is not None
+        assert "action" in result
     
     def test_arbiter_with_encrypted_data(self):
         """Test arbiter handling encrypted data"""
         arbiter = Arbiter()
-        encryption = AdvancedEncryption()
+        encryption = AdvancedEncryption(algorithm='aes-gcm')
         
         data = b"sensitive data"
-        encrypted = encryption.encrypt(data)
+        key = encryption.generate_key(algorithm='aes-gcm')
+        encrypted = encryption.encrypt(data, key)
+        decrypted = encryption.decrypt(encrypted, key)
         
-        action = Mock()
-        action.execute = Mock(return_value={"encrypted_data": encrypted})
+        assert decrypted == data
         
-        result = arbiter.execute(action)
+        # Execute a beat
+        result = arbiter.execute_beat()
         
         assert result is not None
     
@@ -47,8 +48,8 @@ class TestCoreSecurityIntegration:
         # Record action
         arbiter.ledger.record_action("TEST", {"data": "test"})
         
-        # Verify integrity
-        is_valid = arbiter.ledger.verify_integrity()
+        # Verify chain
+        is_valid = arbiter.ledger.verify_chain()
         
         assert is_valid == True
 
@@ -63,10 +64,8 @@ class TestFullStackIntegration:
         
         token = auth.generate_token("test-node")
         
-        action = Mock()
-        action.execute = Mock(return_value={"token": token})
-        
-        result = arbiter.execute(action)
+        # Execute a beat
+        result = arbiter.execute_beat()
         
         assert result is not None
         assert arbiter.ledger.get_chain_length() > 0
@@ -75,7 +74,7 @@ class TestFullStackIntegration:
         """Test beat involving multiple modules"""
         arbiter = Arbiter()
         
-        beat_result = arbiter.beat()
+        beat_result = arbiter.execute_beat()
         
         assert beat_result is not None
         assert arbiter.beat_count > 0

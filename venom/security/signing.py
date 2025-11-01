@@ -194,3 +194,117 @@ class LedgerSigner:
             format=serialization.PublicFormat.Raw
         )
         return public_bytes.hex()
+    
+    # Alias methods for backward compatibility
+    def _convert_to_bytes(self, data: Any) -> bytes:
+        """
+        Convert data to bytes for signing/verification
+        
+        Args:
+            data: Data to convert
+            
+        Returns:
+            Data as bytes
+        """
+        if isinstance(data, bytes):
+            return data
+        elif isinstance(data, str):
+            return data.encode()
+        elif isinstance(data, dict):
+            return json.dumps(data, sort_keys=True, separators=(",", ":")).encode()
+        else:
+            return str(data).encode()
+    
+    def sign_data(self, data: Any) -> bytes:
+        """
+        Sign arbitrary data (alias for sign_entry for compatibility)
+        
+        Args:
+            data: Data to sign (bytes, str, or dict)
+            
+        Returns:
+            Signature bytes
+        """
+        if not self.private_key:
+            raise RuntimeError("Private key not loaded")
+        
+        # Check for None
+        if data is None:
+            raise ValueError("Cannot sign None data")
+        
+        # Convert data to bytes
+        data_bytes = self._convert_to_bytes(data)
+        
+        signature = self.private_key.sign(data_bytes)
+        return signature
+    
+    def sign_ledger_entry(self, entry_data: Dict[str, Any]) -> bytes:
+        """Alias for sign_entry for backward compatibility"""
+        return self.sign_entry(entry_data)
+    
+    def verify_signature(self, data: Any, signature: bytes) -> bool:
+        """
+        Verify signature on arbitrary data (alias for verify_entry for compatibility)
+        
+        Args:
+            data: Data that was signed
+            signature: Signature to verify
+            
+        Returns:
+            True if signature is valid, False otherwise
+        """
+        if not self.public_key:
+            raise RuntimeError("Public key not loaded")
+        
+        try:
+            # Convert data to bytes
+            data_bytes = self._convert_to_bytes(data)
+            
+            self.public_key.verify(signature, data_bytes)
+            return True
+        except Exception as e:
+            logger.warning(f"Signature verification failed: {e}")
+            return False
+    
+    def verify_ledger_entry(self, entry_data: Dict[str, Any], signature: bytes) -> bool:
+        """Alias for verify_entry for backward compatibility"""
+        return self.verify_entry(entry_data, signature)
+    
+    def export_public_key(self, format: str = 'pem'):
+        """
+        Export public key in various formats
+        
+        Args:
+            format: Format ('pem' or 'hex')
+            
+        Returns:
+            Public key as bytes (pem) or string (hex)
+        """
+        if not self.public_key:
+            raise RuntimeError("Public key not loaded")
+        
+        if format == 'hex':
+            return self.get_public_key_hex()
+        else:  # default to pem - return bytes
+            public_pem = self.public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            )
+            return public_pem
+    
+    def get_public_key_fingerprint(self) -> str:
+        """
+        Get public key fingerprint (SHA256 hash of public key)
+        
+        Returns:
+            Fingerprint hex string
+        """
+        if not self.public_key:
+            raise RuntimeError("Public key not loaded")
+        
+        public_bytes = self.public_key.public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw
+        )
+        fingerprint = hashlib.sha256(public_bytes).hexdigest()
+        return fingerprint
