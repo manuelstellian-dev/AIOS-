@@ -8,6 +8,12 @@ import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
+# Import VENOM version
+try:
+    from venom import __version__ as VENOM_VERSION
+except ImportError:
+    VENOM_VERSION = "0.2.0"
+
 # Graceful imports
 try:
     from google.cloud import storage
@@ -122,7 +128,7 @@ class StorageBackupManager:
             # Serialize ledger
             ledger_data = {
                 'chain': [entry.to_dict() for entry in ledger.chain],
-                'version': '0.2.0',
+                'version': VENOM_VERSION,
                 'backup_timestamp': time.time(),
                 'chain_length': len(ledger.chain)
             }
@@ -135,7 +141,7 @@ class StorageBackupManager:
             
             # Set metadata
             blob.metadata = {
-                'venom-version': '0.2.0',
+                'venom-version': VENOM_VERSION,
                 'chain-length': str(len(ledger.chain)),
                 'backup-timestamp': str(time.time())
             }

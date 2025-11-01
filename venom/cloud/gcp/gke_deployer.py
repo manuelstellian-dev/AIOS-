@@ -396,7 +396,6 @@ class GKEDeployer:
         cluster = self.cluster_manager.get_cluster(request=request)
         
         # Create kubeconfig
-        import base64
         
         kubeconfig = {
             'apiVersion': 'v1',
