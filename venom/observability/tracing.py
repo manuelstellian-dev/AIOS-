@@ -183,8 +183,11 @@ class DistributedTracer:
             parts = traceparent.split("-")
             if len(parts) >= 3:
                 parent_id = parts[2]
-                # Convert back to UUID format
-                return f"{parent_id[:8]}-{parent_id[8:12]}-{parent_id[12:16]}-{parent_id[16:20]}-{parent_id[20:32]}"
+                # W3C parent_id is 16 hex characters (8 bytes)
+                # Pad to 32 chars for UUID format conversion
+                if len(parent_id) >= 16:
+                    parent_id = parent_id[:16].ljust(32, '0')
+                    return f"{parent_id[:8]}-{parent_id[8:12]}-{parent_id[12:16]}-{parent_id[16:20]}-{parent_id[20:32]}"
         except Exception as e:
             logger.error(f"Failed to extract context: {e}")
         

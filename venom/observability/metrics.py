@@ -129,36 +129,7 @@ class MetricsCollector:
         with self._lock:
             metric_key = self._format_metric_name(name, labels)
             values = self._summaries.get(metric_key, [])
-            
-            if not values:
-                return {
-                    "count": 0,
-                    "sum": 0.0,
-                    "p50": 0.0,
-                    "p90": 0.0,
-                    "p95": 0.0,
-                    "p99": 0.0
-                }
-            
-            sorted_values = sorted(values)
-            count = len(sorted_values)
-            
-            def percentile(p: float) -> float:
-                idx = int(count * p / 100) - 1
-                if idx < 0:
-                    idx = 0
-                if idx >= count:
-                    idx = count - 1
-                return sorted_values[idx]
-            
-            return {
-                "count": count,
-                "sum": sum(values),
-                "p50": percentile(50),
-                "p90": percentile(90),
-                "p95": percentile(95),
-                "p99": percentile(99)
-            }
+            return self._calculate_percentiles(values)
     
     def _format_metric_name(self, name: str, labels: Optional[Dict[str, str]] = None) -> str:
         """Format metric name with labels"""

@@ -4,6 +4,7 @@ System health monitoring with custom checks and background monitoring
 """
 import time
 import threading
+import os
 import psutil
 from typing import Dict, Any, List, Callable, Optional
 from collections import deque
@@ -195,18 +196,20 @@ class HealthMonitor:
             logger.error(f"Memory check failed: {e}")
             return False
     
-    def check_disk_usage(self, threshold: float = 80.0) -> bool:
+    def check_disk_usage(self, threshold: float = 80.0, path: Optional[str] = None) -> bool:
         """
         Check disk usage
         
         Args:
             threshold: Disk usage threshold percentage
+            path: Path to check (default: current working directory)
             
         Returns:
             True if disk usage is below threshold
         """
         try:
-            disk = psutil.disk_usage('/')
+            check_path = path if path else os.getcwd()
+            disk = psutil.disk_usage(check_path)
             return disk.percent < threshold
         except Exception as e:
             logger.error(f"Disk check failed: {e}")
