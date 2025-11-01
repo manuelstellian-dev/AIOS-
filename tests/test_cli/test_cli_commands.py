@@ -32,7 +32,16 @@ class TestModulesCommands:
     
     def test_modules_list_without_rich(self):
         """Test listing modules without rich (fallback to plain text)"""
-        with patch('venom.cli.main.RICH_AVAILABLE', False):
+        import sys
+        cli_main = sys.modules['venom.cli.main']
+        original_rich = cli_main.RICH_AVAILABLE
+        original_console = cli_main.console
+        
+        try:
+            # Temporarily disable rich
+            cli_main.RICH_AVAILABLE = False
+            cli_main.console = None
+            
             cli = VenomCLI()
             args = MagicMock()
             
@@ -44,6 +53,10 @@ class TestModulesCommands:
             assert "VENOM Modules" in output
             assert "core" in output
             assert "ml" in output
+        finally:
+            # Restore original values
+            cli_main.RICH_AVAILABLE = original_rich
+            cli_main.console = original_console
     
     def test_modules_info_core(self):
         """Test getting info for core module"""
