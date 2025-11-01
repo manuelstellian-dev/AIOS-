@@ -31,30 +31,46 @@ class AnomalyDetector:
     Supports Z-score, IQR, and Isolation Forest methods
     """
     
-    def __init__(self, method: str = 'zscore'):
+    def __init__(self, method: str = 'zscore', threshold: Optional[float] = None):
         """
         Initialize anomaly detector
         
         Args:
-            method: Detection method ('zscore', 'iqr', 'isolation_forest')
+            method: Detection method ('zscore', 'iqr', 'isolation_forest', 'statistical', 'svm')
+            threshold: Optional custom threshold for anomaly detection
         """
-        valid_methods = ['zscore', 'iqr', 'isolation_forest']
+        # Map method aliases
+        method_map = {
+            'statistical': 'zscore',
+            'svm': 'one_class_svm'
+        }
+        method = method_map.get(method, method)
+        
+        valid_methods = ['zscore', 'iqr', 'isolation_forest', 'one_class_svm']
         if method not in valid_methods:
             raise ValueError(f"method must be one of {valid_methods}, got '{method}'")
         
         self.method = method
         self.fitted = False
-        self.threshold: Optional[float] = None
+        self.is_fitted = False  # Alias for compatibility
+        self.threshold: Optional[float] = threshold
         
         # Statistics for zscore and iqr methods
         self.mean: Optional[float] = None
+        self.mean_: Optional[float] = None  # Scikit-learn style attribute
         self.std: Optional[float] = None
         self.q1: Optional[float] = None
         self.q3: Optional[float] = None
         self.iqr: Optional[float] = None
         
+        # Model attribute for compatibility
+        self.model = None
+        
         # Isolation Forest model
         self.isolation_forest = None
+        
+        # One-class SVM model
+        self.one_class_svm = None
         
         logger.info(f"AnomalyDetector initialized with method='{method}'")
     
@@ -82,8 +98,16 @@ class AnomalyDetector:
             self._fit_iqr(data)
         elif self.method == 'isolation_forest':
             self._fit_isolation_forest(data)
+        elif self.method == 'one_class_svm':
+            self._fit_one_class_svm(data)
         
         self.fitted = True
+        self.is_fitted = True
+        
+        # Set mean_ for compatibility
+        if self.mean is not None:
+            self.mean_ = self.mean
+        
         logger.info(f"Fitted on {len(data)} samples")
     
     def _fit_zscore(self, data) -> None:
@@ -150,11 +174,54 @@ class AnomalyDetector:
             random_state=42
         )
         self.isolation_forest.fit(data)
+        self.model = self.isolation_forest
         
         # Calculate threshold based on scores
         scores = -self.isolation_forest.score_samples(data)
         if self.threshold is None:
             self.threshold = float(np.percentile(scores, 99))
+    
+    def _fit_one_class_svm(self, data) -> None:
+        """Fit One-Class SVM"""
+        if not HAS_SKLEARN:
+            logger.warning("scikit-learn not available, falling back to Z-score method")
+            self.method = 'zscore'
+            self._fit_zscore(data)
+            return
+        
+        if not HAS_NUMPY:
+            logger.warning("NumPy not available, falling back to Z-score method")
+            self.method = 'zscore'
+            self._fit_zscore(data)
+            return
+        
+        try:
+            from sklearn.svm import OneClassSVM
+        except ImportError:
+            logger.warning("OneClassSVM not available, falling back to Z-score method")
+            self.method = 'zscore'
+            self._fit_zscore(data)
+            return
+        
+        # Ensure data is 2D numpy array
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        
+        if data.ndim == 1:
+            data = data.reshape(-1, 1)
+        
+        self.one_class_svm = OneClassSVM(
+            kernel='rbf',
+            gamma='auto',
+            nu=0.1
+        )
+        self.one_class_svm.fit(data)
+        self.model = self.one_class_svm
+        
+        # Calculate threshold based on decision function
+        scores = -self.one_class_svm.decision_function(data)
+        if self.threshold is None:
+            self.threshold = float(np.percentile(scores, 90))
     
     def detect(self, data) -> list:
         """
@@ -217,6 +284,8 @@ class AnomalyDetector:
             return self._score_iqr(data)
         elif self.method == 'isolation_forest':
             return self._score_isolation_forest(data)
+        elif self.method == 'one_class_svm':
+            return self._score_one_class_svm(data)
     
     def _score_zscore(self, data) -> list:
         """Calculate Z-score based anomaly scores"""
@@ -298,6 +367,46 @@ class AnomalyDetector:
         # Negative score_samples gives anomaly scores (higher = more anomalous)
         scores = -self.isolation_forest.score_samples(data)
         return scores.tolist()
+    
+    def _score_one_class_svm(self, data) -> list:
+        """Calculate One-Class SVM anomaly scores"""
+        if self.one_class_svm is None:
+            logger.warning("One-Class SVM not available, using Z-score fallback")
+            return self._score_zscore(data)
+        
+        if not HAS_NUMPY:
+            logger.warning("NumPy not available, using Z-score fallback")
+            return self._score_zscore(data)
+        
+        # Ensure data is 2D numpy array
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        
+        if data.ndim == 1:
+            data = data.reshape(-1, 1)
+        
+        # Negative decision_function gives anomaly scores (higher = more anomalous)
+        scores = -self.one_class_svm.decision_function(data)
+        return scores.tolist()
+    
+    def get_anomaly_scores(self, data):
+        """
+        Get anomaly scores for data (alias for score method)
+        
+        Args:
+            data: Data to score
+            
+        Returns:
+            Anomaly scores or None if not fitted
+        """
+        if not self.fitted:
+            return None
+        
+        try:
+            return self.score(data)
+        except Exception as e:
+            logger.warning(f"Failed to get anomaly scores: {e}")
+            return None
     
     def get_threshold(self) -> float:
         """Get current threshold"""
