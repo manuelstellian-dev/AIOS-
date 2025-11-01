@@ -332,7 +332,11 @@ class SearchEngine:
                 
                 # BM25 score component
                 numerator = tf * (k1 + 1)
-                denominator = tf + k1 * (1 - b + b * (doc_length / self.avg_doc_length))
+                # Prevent division by zero
+                if self.avg_doc_length > 0:
+                    denominator = tf + k1 * (1 - b + b * (doc_length / self.avg_doc_length))
+                else:
+                    denominator = tf + k1
                 
                 score += idf * (numerator / denominator)
             
@@ -364,6 +368,5 @@ class SearchEngine:
             'total_terms': total_terms,
             'total_documents': total_docs,
             'total_postings': total_postings,
-            'avg_doc_length': self.avg_doc_length,
-            'unique_terms': len(self.inverted_index)
+            'avg_doc_length': self.avg_doc_length
         }
