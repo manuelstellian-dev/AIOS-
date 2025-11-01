@@ -81,3 +81,25 @@ def test_gpio_operations():
     
     # Test GPIO cleanup (should not raise errors)
     bridge.gpio_cleanup()
+
+
+def test_benchmark():
+    """Test ARM CPU benchmarking"""
+    bridge = ARMBridge()
+    
+    # Test matrix multiplication benchmark
+    result = bridge.benchmark(operation='matmul', size=256)
+    assert isinstance(result, dict)
+    assert "operation" in result
+    assert "size" in result
+    assert "time_ms" in result
+    assert "simulated" in result
+    
+    # Time should be positive
+    assert result["time_ms"] > 0
+    
+    # Test NEON SIMD benchmark
+    result_neon = bridge.benchmark(operation='neon_simd', size=256)
+    assert isinstance(result_neon, dict)
+    assert "operation" in result_neon
+    assert result_neon["operation"] == "neon_simd"

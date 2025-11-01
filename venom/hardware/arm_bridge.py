@@ -315,3 +315,90 @@ class ARMBridge:
             logger.info("GPIO cleanup completed")
         except Exception as e:
             logger.error(f"GPIO cleanup failed: {e}")
+    
+    def benchmark(self, operation: str = 'matmul', size: int = 1024) -> Dict[str, Any]:
+        """
+        Benchmark ARM CPU performance
+        
+        Args:
+            operation: Operation to benchmark ('matmul', 'neon_simd')
+            size: Problem size (default: 1024)
+            
+        Returns:
+            Dict with benchmark results (time_ms, gflops, etc.)
+        """
+        if not self.available:
+            return {
+                "operation": operation,
+                "size": size,
+                "time_ms": 35.2,
+                "gflops": 1200.0,
+                "simulated": True
+            }
+        
+        try:
+            import time
+            import numpy as np
+            
+            if operation == 'matmul':
+                # Matrix multiplication benchmark (CPU-based)
+                a = np.random.randn(size, size).astype(np.float32)
+                b = np.random.randn(size, size).astype(np.float32)
+                
+                # Warmup
+                _ = np.matmul(a, b)
+                
+                # Benchmark
+                start = time.perf_counter()
+                result = np.matmul(a, b)
+                elapsed = (time.perf_counter() - start) * 1000
+                
+                # Calculate GFLOPS (2*N^3 operations for matmul)
+                ops = 2 * size * size * size
+                gflops = (ops / 1e9) / (elapsed / 1000)
+                
+                return {
+                    "operation": operation,
+                    "size": size,
+                    "time_ms": elapsed,
+                    "gflops": gflops,
+                    "neon_optimized": self.optimize_neon(),
+                    "simulated": False
+                }
+            
+            elif operation == 'neon_simd':
+                # NEON SIMD benchmark using numpy vectorized operations
+                data = np.random.randn(size * size).astype(np.float32)
+                
+                # Warmup
+                _ = data * 2.0 + 1.0
+                
+                # Benchmark
+                start = time.perf_counter()
+                result = data * 2.0 + 1.0  # Vectorized operation (uses NEON if available)
+                elapsed = (time.perf_counter() - start) * 1000
+                
+                return {
+                    "operation": operation,
+                    "size": size,
+                    "time_ms": elapsed,
+                    "elements_processed": len(data),
+                    "neon_optimized": self.optimize_neon(),
+                    "simulated": False
+                }
+            
+            else:
+                return {
+                    "operation": operation,
+                    "error": "Unsupported operation",
+                    "simulated": False
+                }
+                
+        except Exception as e:
+            logger.error(f"Benchmark failed: {e}")
+            return {
+                "operation": operation,
+                "size": size,
+                "error": str(e),
+                "simulated": False
+            }
