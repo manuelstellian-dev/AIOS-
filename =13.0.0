@@ -1,0 +1,20 @@
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: cryptography in /usr/lib/python3/dist-packages (41.0.7)
+Requirement already satisfied: pyjwt in /usr/lib/python3/dist-packages (2.7.0)
+Collecting networkx
+  Downloading networkx-3.5-py3-none-any.whl.metadata
+     - 6.3 kB ? 0:00:00
+Collecting psutil
+  Downloading psutil-7.1.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl.metadata
+     - 23.0 kB ? 0:00:00
+Requirement already satisfied: rich in /usr/lib/python3/dist-packages (13.7.1)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /usr/lib/python3/dist-packages (from rich) (3.0.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /usr/lib/python3/dist-packages (from rich) (2.17.2)
+Requirement already satisfied: mdurl~=0.1 in /usr/lib/python3/dist-packages (from markdown-it-py>=2.2.0->rich) (0.1.2)
+Downloading networkx-3.5-py3-none-any.whl
+   - 2.0 MB 121.0 MB/s 0:00:00
+Downloading psutil-7.1.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl
+   - 258.7 kB 177.0 MB/s 0:00:00
+Installing collected packages: psutil, networkx
+
+Successfully installed networkx-3.5 psutil-7.1.2
