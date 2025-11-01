@@ -4,7 +4,7 @@ Comprehensive tests for Predictor module
 import pytest
 import numpy as np
 from unittest.mock import Mock, patch
-from venom.analytics.predictor import Predictor
+from venom.analytics.predictor import PredictiveEngine as Predictor
 
 
 class TestPredictorInit:
