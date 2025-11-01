@@ -32,6 +32,9 @@ class AdvancedEncryption:
     - Key derivation (PBKDF2)
     """
     
+    # Supported encryption algorithms
+    SUPPORTED_ALGORITHMS = ['aes-gcm', 'rsa', 'fernet']
+    
     def __init__(self, algorithm: str = 'aes-gcm'):
         """
         Initialize encryption engine
@@ -39,7 +42,7 @@ class AdvancedEncryption:
         Args:
             algorithm: Encryption algorithm ('aes-gcm', 'rsa', 'fernet')
         """
-        if algorithm not in ['aes-gcm', 'rsa', 'fernet']:
+        if algorithm not in self.SUPPORTED_ALGORITHMS:
             raise ValueError(f"Unsupported algorithm: {algorithm}")
         
         self.algorithm = algorithm

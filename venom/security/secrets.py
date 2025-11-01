@@ -5,6 +5,7 @@ Provides encrypted storage for secrets with master password protection
 import json
 import logging
 import os
+import shutil
 from pathlib import Path
 from typing import Dict, List, Optional
 from cryptography.fernet import Fernet
@@ -258,7 +259,6 @@ class SecretsVault:
         backup_file.parent.mkdir(parents=True, exist_ok=True)
         
         # Copy vault file
-        import shutil
         shutil.copy2(self.vault_file, backup_file)
         
         logger.info(f"Vault backed up to {backup_path}")
@@ -276,7 +276,6 @@ class SecretsVault:
             raise FileNotFoundError(f"Backup file not found: {backup_path}")
         
         # Copy backup to vault file
-        import shutil
         shutil.copy2(backup_file, self.vault_file)
         
         # Reload vault

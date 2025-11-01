@@ -2,6 +2,7 @@
 Security Audit Logger for VENOM
 Provides tamper-evident logging with hash chains
 """
+import csv
 import json
 import logging
 import hashlib
@@ -253,8 +254,6 @@ class AuditLogger:
         
         elif format == 'csv':
             # Export as CSV
-            import csv
-            
             if not events:
                 logger.warning("No events to export")
                 return

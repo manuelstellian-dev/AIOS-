@@ -98,6 +98,11 @@ class MFAManager:
             
         Returns:
             List of 8-character alphanumeric backup codes
+            
+        Note:
+            Uses uppercase letters and digits (36 characters) for better
+            readability and user experience. This provides sufficient entropy
+            (8 chars from 36 = ~41 bits) for backup codes.
         """
         codes = []
         alphabet = string.ascii_uppercase + string.digits
