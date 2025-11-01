@@ -44,6 +44,9 @@ jobs:
         pip install uvicorn>=0.23.0
         pip install pandas>=1.5.0
         pip install Pillow>=10.2.0
+        pip install pyotp>=2.9.0
+        pip install qrcode>=7.4.0
+        pip install bcrypt>=4.1.0
         # Install lightweight CPU-only torch (not GPU version)
         pip install torch --index-url https://download.pytorch.org/whl/cpu
         pip install torchvision --index-url https://download.pytorch.org/whl/cpu
@@ -96,6 +99,9 @@ jobs:
         pip install uvicorn>=0.23.0
         pip install pandas>=1.5.0
         pip install Pillow>=10.2.0
+        pip install pyotp>=2.9.0
+        pip install qrcode>=7.4.0
+        pip install bcrypt>=4.1.0
         # Install lightweight CPU-only torch (not GPU version)
         pip install torch --index-url https://download.pytorch.org/whl/cpu
         pip install torchvision --index-url https://download.pytorch.org/whl/cpu
