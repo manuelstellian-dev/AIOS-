@@ -38,8 +38,8 @@ def test_inference(bridge):
         
     text = "Hello, how are you"
     result = bridge.inference(
-        text=text,
         model_name='gpt2',
+        text=text,
         task='text-generation',
         max_length=20
     )
@@ -63,8 +63,8 @@ def test_batch_inference(bridge):
     ]
     
     results = bridge.batch_inference(
-        texts=texts,
         model_name='gpt2',
+        texts=texts,
         task='text-generation',
         max_length=20
     )
