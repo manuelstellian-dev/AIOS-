@@ -94,12 +94,12 @@ class TestEndToEnd:
             
             # Test encryption/decryption
             plaintext = b"Sensitive data to encrypt"
-            encrypted, nonce = encryption.encrypt(plaintext, key)
+            encrypted_data = encryption.encrypt(plaintext, key)
             
-            assert encrypted != plaintext
-            assert len(nonce) == 12  # GCM nonce size
+            assert encrypted_data != plaintext
+            assert len(encrypted_data) > len(plaintext)  # Has nonce prepended
             
-            decrypted = encryption.decrypt(encrypted, key, nonce)
+            decrypted = encryption.decrypt(encrypted_data, key)
             assert decrypted == plaintext
             
         except ImportError:
@@ -119,7 +119,7 @@ class TestEndToEnd:
             time.sleep(0.3)
             
             # Check metrics collected
-            status = monitor.get_current_status()
+            status = monitor.get_current_metrics()
             assert 'theta' in status
             assert 'cpu_health' in status
             assert 'memory_health' in status
@@ -263,20 +263,18 @@ class TestIntegrationWorkflows:
             # Test data flow
             data = b"Sensitive document content"
             key = encryption.generate_key(algorithm='aes-gcm')
-            encrypted, nonce = encryption.encrypt(data, key)
+            encrypted_data = encryption.encrypt(data, key)
             
             # Store encrypted data (simulated)
             storage = {
-                'data': encrypted,
-                'nonce': nonce,
+                'data': encrypted_data,
                 'algorithm': 'aes-gcm'
             }
             
             # Retrieve and decrypt
             decrypted = encryption.decrypt(
                 storage['data'],
-                key,
-                storage['nonce']
+                key
             )
             
             assert decrypted == data
@@ -296,7 +294,7 @@ class TestIntegrationWorkflows:
             
             # Collect metrics
             time.sleep(0.3)
-            status = monitor.get_current_status()
+            status = monitor.get_current_metrics()
             
             # Verify analytics data
             assert 'theta' in status

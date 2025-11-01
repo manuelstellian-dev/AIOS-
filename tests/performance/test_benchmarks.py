@@ -250,7 +250,7 @@ class TestScalabilityBenchmarks:
             num_concurrent = 20
             
             def get_status():
-                return monitor.get_current_status()
+                return monitor.get_current_metrics()
             
             start_time = time.time()
             
