@@ -128,7 +128,7 @@ class TestConfigSaving:
             
             # Create file with no write permissions
             config_file.touch()
-            os.chmod(config_file, 0o444)  # Read-only
+            config_file.chmod(0o444)  # Read-only
             
             try:
                 with patch.object(VenomCLI, 'CONFIG_FILE', config_file):
@@ -139,7 +139,7 @@ class TestConfigSaving:
                     cli._save_config()
             finally:
                 # Restore permissions for cleanup
-                os.chmod(config_file, 0o644)
+                config_file.chmod(0o644)
 
 
 class TestDefaultConfig:

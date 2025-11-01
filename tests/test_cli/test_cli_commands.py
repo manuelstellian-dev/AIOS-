@@ -168,7 +168,6 @@ class TestAICommands:
             assert result == 0
         finally:
             os.unlink(temp_file)
-    
 
 
 
