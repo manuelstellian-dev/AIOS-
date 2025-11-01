@@ -110,13 +110,7 @@ class TransformerBridge:
                 
                 return self.models[model_name]
             except Exception as e1:
-                # Check if it's a connection error (offline mode)
-                error_msg = str(e1).lower()
-                if 'connect' in error_msg or 'network' in error_msg or 'offline' in error_msg:
-                    # Skip this test when offline
-                    import pytest
-                    pytest.skip(f"Cannot load model '{model_name}' in offline mode")
-                # Fall back to pipeline approach
+                # Fall back to pipeline approach if AutoModel fails
                 pass
             
             # Try pipeline approach
@@ -132,12 +126,6 @@ class TransformerBridge:
             
             return pipeline
         except Exception as e:
-            # Check if it's a connection error
-            error_msg = str(e).lower()
-            if 'connect' in error_msg or 'network' in error_msg or 'offline' in error_msg:
-                import pytest
-                pytest.skip(f"Cannot load model '{model_name}' in offline mode")
-            
             warnings.warn(f"Failed to load model '{model_name}': {e}")
             return None
             

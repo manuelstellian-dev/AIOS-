@@ -479,10 +479,10 @@ class AnomalyDetector:
                     predictions = np.array(predictions)
             
             # Calculate metrics
-            true_positives = sum(1 for i in range(len(y_true)) if y_true[i] == 1 and predictions[i] == True)
-            false_positives = sum(1 for i in range(len(y_true)) if y_true[i] == 0 and predictions[i] == True)
-            true_negatives = sum(1 for i in range(len(y_true)) if y_true[i] == 0 and predictions[i] == False)
-            false_negatives = sum(1 for i in range(len(y_true)) if y_true[i] == 1 and predictions[i] == False)
+            true_positives = sum(1 for i in range(len(y_true)) if y_true[i] == 1 and predictions[i])
+            false_positives = sum(1 for i in range(len(y_true)) if y_true[i] == 0 and predictions[i])
+            true_negatives = sum(1 for i in range(len(y_true)) if y_true[i] == 0 and not predictions[i])
+            false_negatives = sum(1 for i in range(len(y_true)) if y_true[i] == 1 and not predictions[i])
             
             precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0.0
             recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0.0
