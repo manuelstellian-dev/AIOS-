@@ -34,6 +34,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install torch --index-url https://download.pytorch.org/whl/cpu
         pip install pytest pytest-cov
+        # Install all dependencies from requirements.txt
+        if [ -f requirements.txt ]; then 
+          pip install -r requirements.txt
+        fi
         pip install -e .
     
     - name: Lint with flake8 (if installed)
@@ -71,6 +75,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install torch --index-url https://download.pytorch.org/whl/cpu
         pip install pytest
+        # Install all dependencies from requirements.txt
+        if [ -f requirements.txt ]; then 
+          pip install -r requirements.txt
+        fi
         pip install -e .
     
     - name: Run integration tests
