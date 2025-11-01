@@ -161,6 +161,9 @@ class WebhookIntegration:
         """
         Send form-encoded data via POST
         
+        Note: This method sends form data without retry logic.
+        Use send_json() if you need retry support.
+        
         Args:
             data: Data dict to send as form data
             
@@ -170,7 +173,7 @@ class WebhookIntegration:
         try:
             response = requests.post(
                 self.url,
-                data=data,
+                data=data,  # form-encoded, not JSON
                 headers=self.headers,
                 auth=self.auth,
                 timeout=self.timeout

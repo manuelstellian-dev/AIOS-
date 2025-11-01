@@ -182,17 +182,18 @@ class DatabaseIntegration:
         Returns:
             Row as dict or None
         """
-        cursor = self.execute(query, params, commit=False)
-        
         if self.db_type == 'sqlite':
+            cursor = self.execute(query, params, commit=False)
             row = cursor.fetchone()
             return dict(row) if row else None
         elif self.db_type == 'postgresql':
+            # Use RealDictCursor for dict results
             cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cursor.execute(query.replace('?', '%s'), params or ())
             row = cursor.fetchone()
             return dict(row) if row else None
         elif self.db_type == 'mysql':
+            cursor = self.execute(query, params, commit=False)
             row = cursor.fetchone()
             if row:
                 columns = [desc[0] for desc in cursor.description]
@@ -214,17 +215,18 @@ class DatabaseIntegration:
         Returns:
             List of rows as dicts
         """
-        cursor = self.execute(query, params, commit=False)
-        
         if self.db_type == 'sqlite':
+            cursor = self.execute(query, params, commit=False)
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
         elif self.db_type == 'postgresql':
+            # Use RealDictCursor for dict results
             cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cursor.execute(query.replace('?', '%s'), params or ())
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
         elif self.db_type == 'mysql':
+            cursor = self.execute(query, params, commit=False)
             rows = cursor.fetchall()
             columns = [desc[0] for desc in cursor.description]
             return [dict(zip(columns, row)) for row in rows]
