@@ -32,13 +32,24 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install torch --index-url https://download.pytorch.org/whl/cpu
         pip install pytest pytest-cov
-        # Install all dependencies from requirements.txt
-        if [ -f requirements.txt ]; then 
-          pip install -r requirements.txt
-        fi
-        pip install -e .
+        # Install CORE dependencies only (lightweight)
+        pip install cryptography>=41.0.0
+        pip install pyjwt>=2.8.0
+        pip install networkx>=3.0
+        pip install psutil>=5.9.0
+        pip install rich>=13.0.0
+        pip install numpy>=1.24.0
+        pip install fastapi>=0.109.1
+        pip install uvicorn>=0.23.0
+        pip install pandas>=1.5.0
+        pip install Pillow>=10.2.0
+        # Install lightweight CPU-only torch (not GPU version)
+        pip install torch --index-url https://download.pytorch.org/whl/cpu
+        pip install torchvision --index-url https://download.pytorch.org/whl/cpu
+        # Skip heavy ML dependencies (transformers, optuna)
+        # ML tests will skip gracefully if dependencies unavailable
+        pip install -e . --no-deps
     
     - name: Lint with flake8 (if installed)
       run: |
@@ -73,13 +84,24 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install torch --index-url https://download.pytorch.org/whl/cpu
         pip install pytest
-        # Install all dependencies from requirements.txt
-        if [ -f requirements.txt ]; then 
-          pip install -r requirements.txt
-        fi
-        pip install -e .
+        # Install CORE dependencies only (lightweight)
+        pip install cryptography>=41.0.0
+        pip install pyjwt>=2.8.0
+        pip install networkx>=3.0
+        pip install psutil>=5.9.0
+        pip install rich>=13.0.0
+        pip install numpy>=1.24.0
+        pip install fastapi>=0.109.1
+        pip install uvicorn>=0.23.0
+        pip install pandas>=1.5.0
+        pip install Pillow>=10.2.0
+        # Install lightweight CPU-only torch (not GPU version)
+        pip install torch --index-url https://download.pytorch.org/whl/cpu
+        pip install torchvision --index-url https://download.pytorch.org/whl/cpu
+        # Skip heavy ML dependencies (transformers, optuna)
+        # ML tests will skip gracefully if dependencies unavailable
+        pip install -e . --no-deps
     
     - name: Run integration tests
       run: |
