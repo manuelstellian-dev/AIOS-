@@ -111,8 +111,8 @@ class SecretsVault:
                 try:
                     decrypted = self._fernet.decrypt(encrypted_value.encode())
                     self._secrets[key] = decrypted.decode()
-                except Exception as e:
-                    logger.error(f"Failed to decrypt secret '{key}': {e}")
+                except Exception:
+                    logger.error("Failed to decrypt a secret")
             
             logger.info(f"Loaded {len(self._secrets)} secrets from vault")
         
@@ -241,7 +241,6 @@ class SecretsVault:
         for key, value in self._secrets.items():
             env_var = f"{prefix}{key.upper()}"
             os.environ[env_var] = value
-            logger.debug(f"Loaded secret to env: {env_var}")
         
         logger.info(f"Loaded {len(self._secrets)} secrets to environment")
     
