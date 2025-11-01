@@ -4,7 +4,6 @@ Provides Bayesian optimization for model hyperparameters
 """
 import warnings
 from typing import Dict, Any, Callable, Optional
-import pandas as pd
 
 
 class AutoMLPipeline:
@@ -121,17 +120,26 @@ class AutoMLPipeline:
         except Exception as e:
             raise RuntimeError(f"Hyperparameter tuning failed: {e}")
             
-    def auto_feature_engineering(self, df: pd.DataFrame) -> pd.DataFrame:
+    def auto_feature_engineering(self, df):
         """
         Automatic feature engineering on DataFrame
         Creates interaction features, polynomial features, etc.
         
         Args:
-            df: Input DataFrame
+            df: Input DataFrame (pandas)
             
         Returns:
             DataFrame with engineered features
         """
+        try:
+            import pandas as pd
+            import numpy as np
+        except ImportError:
+            raise RuntimeError(
+                "pandas not installed. "
+                "Install with: pip install pandas"
+            )
+            
         if not isinstance(df, pd.DataFrame):
             raise ValueError("Input must be a pandas DataFrame")
             
@@ -154,7 +162,7 @@ class AutoMLPipeline:
         # Create log features for positive numeric columns
         for col in numeric_cols:
             if (df[col] > 0).all():
-                df_engineered[f'{col}_log'] = df[col].apply(lambda x: pd.np.log(x) if x > 0 else 0)
+                df_engineered[f'{col}_log'] = df[col].apply(lambda x: np.log(x) if x > 0 else 0)
                 
         return df_engineered
         
