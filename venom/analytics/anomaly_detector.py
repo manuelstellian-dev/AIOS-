@@ -231,10 +231,11 @@ class AnomalyDetector:
             data: Data to check for anomalies (numpy array or list)
             
         Returns:
-            Boolean mask (list or numpy array) indicating anomalies
+            Boolean mask (list or numpy array) indicating anomalies, or None if not fitted
         """
         if not self.fitted:
-            raise RuntimeError("Must call fit() before detect()")
+            logger.warning("Detector not fitted, returning None")
+            return None
         
         if HAS_NUMPY:
             if not isinstance(data, np.ndarray):
@@ -262,10 +263,11 @@ class AnomalyDetector:
             data: Data to score (numpy array or list)
             
         Returns:
-            Anomaly scores (higher = more anomalous)
+            Anomaly scores (higher = more anomalous), or None if not fitted
         """
         if not self.fitted:
-            raise RuntimeError("Must call fit() before score()")
+            logger.warning("Detector not fitted, returning None")
+            return None
         
         if HAS_NUMPY:
             if not isinstance(data, np.ndarray):
@@ -421,3 +423,156 @@ class AnomalyDetector:
         """
         self.threshold = threshold
         logger.info(f"Threshold set to {threshold}")
+    
+    def get_statistics(self) -> Optional[dict]:
+        """
+        Get detection statistics
+        
+        Returns:
+            Dictionary with statistics or None if not fitted
+        """
+        if not self.fitted:
+            return None
+        
+        stats = {
+            'method': self.method,
+            'threshold': self.threshold,
+            'fitted': self.fitted
+        }
+        
+        if self.mean is not None:
+            stats['mean'] = self.mean
+        if self.std is not None:
+            stats['std'] = self.std
+        if self.q1 is not None:
+            stats['q1'] = self.q1
+        if self.q3 is not None:
+            stats['q3'] = self.q3
+        if self.iqr is not None:
+            stats['iqr'] = self.iqr
+        
+        return stats
+    
+    def evaluate(self, X, y_true) -> Optional[dict]:
+        """
+        Evaluate detector performance
+        
+        Args:
+            X: Test data
+            y_true: True anomaly labels (0=normal, 1=anomaly)
+            
+        Returns:
+            Dictionary with evaluation metrics or None
+        """
+        if not self.fitted:
+            return None
+        
+        try:
+            # Get predictions
+            predictions = self.detect(X)
+            
+            # Convert to arrays if needed
+            if HAS_NUMPY:
+                if not isinstance(y_true, np.ndarray):
+                    y_true = np.array(y_true)
+                if not isinstance(predictions, np.ndarray):
+                    predictions = np.array(predictions)
+            
+            # Calculate metrics
+            true_positives = sum(1 for i in range(len(y_true)) if y_true[i] == 1 and predictions[i] == True)
+            false_positives = sum(1 for i in range(len(y_true)) if y_true[i] == 0 and predictions[i] == True)
+            true_negatives = sum(1 for i in range(len(y_true)) if y_true[i] == 0 and predictions[i] == False)
+            false_negatives = sum(1 for i in range(len(y_true)) if y_true[i] == 1 and predictions[i] == False)
+            
+            precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0.0
+            recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0.0
+            f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+            accuracy = (true_positives + true_negatives) / len(y_true) if len(y_true) > 0 else 0.0
+            
+            return {
+                'precision': precision,
+                'recall': recall,
+                'f1_score': f1_score,
+                'accuracy': accuracy,
+                'true_positives': true_positives,
+                'false_positives': false_positives,
+                'true_negatives': true_negatives,
+                'false_negatives': false_negatives
+            }
+        except Exception as e:
+            logger.warning(f"Failed to evaluate: {e}")
+            return None
+    
+    def save(self, filepath: str) -> bool:
+        """
+        Save detector to file
+        
+        Args:
+            filepath: Path to save file
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            import pickle
+            
+            state = {
+                'method': self.method,
+                'threshold': self.threshold,
+                'fitted': self.fitted,
+                'is_fitted': self.is_fitted,
+                'mean': self.mean,
+                'mean_': self.mean_,
+                'std': self.std,
+                'q1': self.q1,
+                'q3': self.q3,
+                'iqr': self.iqr,
+                'model': self.model,
+                'isolation_forest': self.isolation_forest,
+                'one_class_svm': self.one_class_svm
+            }
+            
+            with open(filepath, 'wb') as f:
+                pickle.dump(state, f)
+            
+            logger.info(f"Model saved to {filepath}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save model: {e}")
+            return False
+    
+    def load(self, filepath: str) -> bool:
+        """
+        Load detector from file
+        
+        Args:
+            filepath: Path to load from
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            import pickle
+            
+            with open(filepath, 'rb') as f:
+                state = pickle.load(f)
+            
+            self.method = state.get('method', 'zscore')
+            self.threshold = state.get('threshold')
+            self.fitted = state.get('fitted', False)
+            self.is_fitted = state.get('is_fitted', False)
+            self.mean = state.get('mean')
+            self.mean_ = state.get('mean_')
+            self.std = state.get('std')
+            self.q1 = state.get('q1')
+            self.q3 = state.get('q3')
+            self.iqr = state.get('iqr')
+            self.model = state.get('model')
+            self.isolation_forest = state.get('isolation_forest')
+            self.one_class_svm = state.get('one_class_svm')
+            
+            logger.info(f"Model loaded from {filepath}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to load model: {e}")
+            return False
