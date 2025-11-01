@@ -224,10 +224,10 @@ class ModelServer:
         )
         self._server = self.uvicorn.Server(config)
         
-        # Run server in separate thread
+        # Run server in separate thread (non-daemon for proper cleanup)
         self._server_thread = threading.Thread(
             target=self._server.run,
-            daemon=True
+            daemon=False
         )
         self._server_thread.start()
         

@@ -162,7 +162,7 @@ class AutoMLPipeline:
         # Create log features for positive numeric columns
         for col in numeric_cols:
             if (df[col] > 0).all():
-                df_engineered[f'{col}_log'] = df[col].apply(lambda x: np.log(x) if x > 0 else 0)
+                df_engineered[f'{col}_log'] = df[col].apply(np.log)
                 
         return df_engineered
         
