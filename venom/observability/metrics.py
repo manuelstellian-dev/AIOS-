@@ -22,6 +22,7 @@ class MetricsCollector:
         self._counters: Dict[str, float] = defaultdict(float)
         self._gauges: Dict[str, float] = {}
         self._histograms: Dict[str, list] = defaultdict(list)
+        self._summaries: Dict[str, list] = defaultdict(list)
         self._lock = threading.Lock()
         
         # Initialize core metrics
@@ -68,11 +69,23 @@ class MetricsCollector:
             metric_key = self._format_metric_name(name, labels)
             self._counters[metric_key] += value
     
+    def get_counter(self, name: str, labels: Optional[Dict[str, str]] = None) -> float:
+        """Get counter value"""
+        with self._lock:
+            metric_key = self._format_metric_name(name, labels)
+            return self._counters.get(metric_key, 0.0)
+    
     def set_gauge(self, name: str, value: float, labels: Optional[Dict[str, str]] = None):
         """Set a gauge metric"""
         with self._lock:
             metric_key = self._format_metric_name(name, labels)
             self._gauges[metric_key] = value
+    
+    def get_gauge(self, name: str, labels: Optional[Dict[str, str]] = None) -> float:
+        """Get gauge value"""
+        with self._lock:
+            metric_key = self._format_metric_name(name, labels)
+            return self._gauges.get(metric_key, 0.0)
     
     def observe_histogram(self, name: str, value: float, labels: Optional[Dict[str, str]] = None):
         """Add observation to histogram"""
@@ -83,6 +96,69 @@ class MetricsCollector:
             # Keep only last 1000 observations
             if len(self._histograms[metric_key]) > 1000:
                 self._histograms[metric_key] = self._histograms[metric_key][-1000:]
+    
+    def get_histogram_stats(self, name: str, labels: Optional[Dict[str, str]] = None) -> Dict:
+        """Get histogram statistics"""
+        with self._lock:
+            metric_key = self._format_metric_name(name, labels)
+            values = self._histograms.get(metric_key, [])
+            
+            if not values:
+                return {"count": 0, "sum": 0.0, "min": 0.0, "max": 0.0, "avg": 0.0}
+            
+            return {
+                "count": len(values),
+                "sum": sum(values),
+                "min": min(values),
+                "max": max(values),
+                "avg": sum(values) / len(values)
+            }
+    
+    def observe_summary(self, name: str, value: float, labels: Optional[Dict[str, str]] = None):
+        """Add observation to summary"""
+        with self._lock:
+            metric_key = self._format_metric_name(name, labels)
+            self._summaries[metric_key].append(value)
+            
+            # Keep only last 1000 observations
+            if len(self._summaries[metric_key]) > 1000:
+                self._summaries[metric_key] = self._summaries[metric_key][-1000:]
+    
+    def get_summary_stats(self, name: str, labels: Optional[Dict[str, str]] = None) -> Dict:
+        """Get summary statistics with percentiles"""
+        with self._lock:
+            metric_key = self._format_metric_name(name, labels)
+            values = self._summaries.get(metric_key, [])
+            
+            if not values:
+                return {
+                    "count": 0,
+                    "sum": 0.0,
+                    "p50": 0.0,
+                    "p90": 0.0,
+                    "p95": 0.0,
+                    "p99": 0.0
+                }
+            
+            sorted_values = sorted(values)
+            count = len(sorted_values)
+            
+            def percentile(p: float) -> float:
+                idx = int(count * p / 100) - 1
+                if idx < 0:
+                    idx = 0
+                if idx >= count:
+                    idx = count - 1
+                return sorted_values[idx]
+            
+            return {
+                "count": count,
+                "sum": sum(values),
+                "p50": percentile(50),
+                "p90": percentile(90),
+                "p95": percentile(95),
+                "p99": percentile(99)
+            }
     
     def _format_metric_name(self, name: str, labels: Optional[Dict[str, str]] = None) -> str:
         """Format metric name with labels"""
@@ -179,6 +255,60 @@ class MetricsCollector:
                 "gauges": dict(self._gauges),
                 "histogram_counts": {k: len(v) for k, v in self._histograms.items()}
             }
+    
+    def export_json(self) -> Dict:
+        """Export metrics in JSON format"""
+        with self._lock:
+            return {
+                "counters": dict(self._counters),
+                "gauges": dict(self._gauges),
+                "histograms": {
+                    name: {
+                        "count": len(values),
+                        "sum": sum(values),
+                        "values": values[-100:]  # Last 100 values
+                    }
+                    for name, values in self._histograms.items()
+                },
+                "summaries": {
+                    name: self._calculate_percentiles(values)
+                    for name, values in self._summaries.items()
+                }
+            }
+    
+    def _calculate_percentiles(self, values: list) -> Dict:
+        """Calculate percentiles for summary"""
+        if not values:
+            return {"count": 0, "sum": 0.0, "p50": 0.0, "p90": 0.0, "p95": 0.0, "p99": 0.0}
+        
+        sorted_values = sorted(values)
+        count = len(sorted_values)
+        
+        def percentile(p: float) -> float:
+            idx = int(count * p / 100) - 1
+            if idx < 0:
+                idx = 0
+            if idx >= count:
+                idx = count - 1
+            return sorted_values[idx]
+        
+        return {
+            "count": count,
+            "sum": sum(values),
+            "p50": percentile(50),
+            "p90": percentile(90),
+            "p95": percentile(95),
+            "p99": percentile(99)
+        }
+    
+    def reset_metrics(self) -> None:
+        """Reset all metrics to initial state"""
+        with self._lock:
+            self._counters.clear()
+            self._gauges.clear()
+            self._histograms.clear()
+            self._summaries.clear()
+            self._initialize_metrics()
 
 
 class MetricsServer:
