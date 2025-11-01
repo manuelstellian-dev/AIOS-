@@ -29,6 +29,7 @@ from .mesh.p2p import P2PMesh
 from .observability import MetricsCollector, MetricsServer, HealthChecker
 from .ops import BackupManager, AuditTrail
 from .security import LedgerSigner, MeshAuthenticator
+from .knowledge import DocumentStore, SearchEngine, KnowledgeGraph
 
 __all__ = [
     "Arbiter",
@@ -55,4 +56,7 @@ __all__ = [
     "AuditTrail",
     "LedgerSigner",
     "MeshAuthenticator",
+    "DocumentStore",
+    "SearchEngine",
+    "KnowledgeGraph",
 ]
