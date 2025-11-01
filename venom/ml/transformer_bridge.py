@@ -340,7 +340,14 @@ class TransformerBridge:
             # Get embeddings
             with torch.no_grad():
                 outputs = model(**inputs)
-                embeddings = outputs.last_hidden_state
+                # Check if model has last_hidden_state attribute
+                if hasattr(outputs, 'last_hidden_state'):
+                    embeddings = outputs.last_hidden_state
+                elif hasattr(outputs, 'pooler_output'):
+                    embeddings = outputs.pooler_output
+                else:
+                    # Fallback to first element if it's a tuple/list
+                    embeddings = outputs[0] if isinstance(outputs, (tuple, list)) else outputs
             
             # Return as numpy array
             return embeddings.numpy()
@@ -367,10 +374,11 @@ class TransformerBridge:
         if model_name in self.models:
             del self.models[model_name]
         
-        # Also clean up from internal caches
-        cache_keys_to_remove = [k for k in self._pipeline_cache.keys() if k.startswith(f"{model_name}:")]
-        for key in cache_keys_to_remove:
-            del self._pipeline_cache[key]
+        # Also clean up from internal caches - use dict comprehension for efficiency
+        self._pipeline_cache = {
+            k: v for k, v in self._pipeline_cache.items() 
+            if not k.startswith(f"{model_name}:")
+        }
     
     def clear_models(self) -> None:
         """
