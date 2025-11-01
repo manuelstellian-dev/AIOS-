@@ -3,7 +3,7 @@ Tests for Security Audit Logger
 """
 import pytest
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from venom.security.audit import AuditLogger
 
 
@@ -71,7 +71,7 @@ def test_get_events_filtered(tmp_path):
     assert all(e['event_type'] == 'auth' for e in auth_events)
     
     # Filter by time range
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     past = now - timedelta(hours=1)
     future = now + timedelta(hours=1)
     
