@@ -12,6 +12,13 @@ setup(
         "rich>=13.0.0",
         "psutil>=5.9.0",
         "networkx>=3.0",
+        "transformers>=4.30.0",
+        "torchvision>=0.15.0",
+        "optuna>=3.0.0",
+        "fastapi>=0.100.0",
+        "uvicorn>=0.23.0",
+        "Pillow>=10.0.0",
+        "pandas>=1.5.0",
     ],
     python_requires=">=3.8",
     entry_points={
