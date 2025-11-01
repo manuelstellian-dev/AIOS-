@@ -7,7 +7,7 @@ import json
 import logging
 import hashlib
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from pathlib import Path
 
@@ -134,7 +134,7 @@ class AuditLogger:
         # Create event
         event = {
             'event_id': event_id,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'event_type': event_type,
             'user': user,
             'action': action,
