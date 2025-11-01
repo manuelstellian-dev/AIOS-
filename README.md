@@ -1,501 +1,568 @@
-# VENOM Ω-AIOS - Universal Adaptive AI Operating System
+# VENOM Framework v1.0.0
 
-**Autonomous AI OS with Möbius Temporal Compression** - Deploy on ANY device (Raspberry Pi to Cloud) with 10x-100,000x adaptive speedup. Fractal organism orchestrated by Omega Arbiter with universal hardware adaptation.
+**Universal Adaptive AI Operating System** - Deploy on ANY device (Raspberry Pi to Cloud) with autonomous AI capabilities, temporal compression, and comprehensive tooling.
 
-[![Architecture](https://img.shields.io/badge/docs-ARCHITECTURE.md-blue)](ARCHITECTURE.md)
-[![Möbius Engine](https://img.shields.io/badge/docs-MOBIUS__ENGINE.md-green)](docs/MOBIUS_ENGINE.md)
-[![Deployment](https://img.shields.io/badge/docs-UNIVERSAL__DEPLOYMENT.md-orange)](docs/UNIVERSAL_DEPLOYMENT.md)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)](setup.py)
-
----
-
-## 🌌 VENOM Ω-AIOS (v0.2.0)
-
-### What's New: Universal Adaptive Möbius Engine (Λ-TAS)
-
-The **Ω-AIOS upgrade** adds **universal hardware adaptation** and **temporal compression**:
-
-- **🔍 Universal Hardware Scanner**: Auto-detects ANY device (Raspberry Pi to Cloud)
-- **⚡ Adaptive Möbius Engine**: Temporal compression with 10x-100,000x speedup
-- **📊 Theta Monitor**: Real-time system health (θ = CPU + Memory + Thermal)
-- **🌊 Omega Arbiter**: Parallel wave execution with adaptive throttling
-- **🚀 Parallel Executor**: Dependency-aware task execution with λ-wrapping
-
-### Mathematical Foundation
-
-```
-T_parallel = T_sequential / S_Total
-
-S_Total = Θ(θ) × Λ × S_A
-
-θ = 0.3×H_CPU + 0.3×H_MEM + 0.4×H_TERM  [System Health]
-Θ(θ) = Adaptive Compression [0.5-3.0]
-Λ = Lambda Wrap [10-832, adaptive]
-S_A = Amdahl's Law: 1/[(1-P) + P/N]
-```
-
-### Device Support & Performance
-
-| Device | Speedup | Example: 840h → |
-|--------|---------|-----------------|
-| Raspberry Pi 4 | 50-150x | 5.6h |
-| Laptop (8 cores) | 1,000-3,000x | 0.3h (17 min) |
-| Cloud (32 cores) | 10,000-50,000x | 0.03h (2 min) |
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)](setup.py)
+[![Python](https://img.shields.io/badge/python-3.8+-green)](https://python.org)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)]()
 
 ---
 
-## 📚 Complete System: 35+ Features
+## 🌟 Features at a Glance
 
-### Original VENOM Λ-GENESIS (v0.1.0)
-- **Core:** 8 components (Arbiter, T_Λ Pulse, PID, 4 Cores, Entropy, Ledger, P2P, Observability)
-- **Wave 1-4:** 16 features + 40 FEV concepts (Math, Physics, Biology, Chemistry)
-- **Operations:** 5 features (Backup, Ed25519, JWT, Audit, Shutdown)
-- **Tools:** 3 utilities (Benchmark, Load Test, Dashboard)
-
-### NEW: VENOM Ω-AIOS (v0.2.0)
-- **🔍 Universal Hardware Scanner**: Cross-platform detection (CPU, Memory, GPU, Thermal)
-- **⚡ Adaptive Möbius Engine**: Temporal compression with 5 modes (UNWRAP→OPTIMIZE)
-- **📊 Theta Monitor**: Real-time health monitoring with Prometheus metrics
-- **🌊 Omega Arbiter**: Enhanced Arbiter with wave execution & adaptive throttling
-- **🚀 Parallel Wave Executor**: Dependency-aware parallel execution with networkx
-
-**📖 See [docs/MOBIUS_ENGINE.md](docs/MOBIUS_ENGINE.md) for mathematical details**  
-**📖 See [docs/UNIVERSAL_DEPLOYMENT.md](docs/UNIVERSAL_DEPLOYMENT.md) for deployment guide**  
-**📖 See [ARCHITECTURE.md](ARCHITECTURE.md) for system architecture**
+- **🤖 AI/ML**: AutoML, model serving, transformer support, vision models
+- **🔐 Security**: AES-256-GCM encryption, Ed25519 signing, MFA, secrets management
+- **☁️ Multi-Cloud**: AWS, GCP, Azure deployment and management
+- **📚 Knowledge**: Document storage, semantic search, knowledge graphs
+- **📊 Observability**: Prometheus metrics, health monitoring, theta tracking
+- **🌐 Integrations**: Slack, webhooks, PostgreSQL, MySQL
+- **⚡ Performance**: Temporal compression (10x-100,000x speedup)
+- **🎯 CLI**: Comprehensive command-line interface with 20+ commands
+- **🧪 Testing**: Chaos engineering, load testing, comprehensive test suite
 
 ---
 
-## Architecture Overview
+## 📦 Quick Start
 
-VENOM Λ-GENESIS is a **fractal organism** with Lyapunov stability (ΔV < 0) and continuous recalibration.
-
-### Core Components (Original VENOM)
-
-1. **Arbiter** - Decisional Brain with ThreadPoolExecutor (4 workers)
-2. **T_Λ Pulse** - Time Compression: `T_Λ(k,P,U) = (T1*ln(U))/(1-1/kP)`
-3. **Genomic PID** - Lyapunov stability controller (ΔV < 0)
-4. **Four Parallel Cores** - RegenCore (R), BalanceCore (B), EntropyCore (E), OptimizeCore (O)
-5. **Entropy Model** - torch.nn.Linear(1,1) + Sigmoid
-6. **Immutable Ledger** - SHA3-256 blockchain with Merkle root
-7. **P2P Mesh** - Nanobot Phalanx (FIFO queue, adaptive delay)
-8. **Observability** - Prometheus metrics + Health checks (port 8000)
-
----
-
-## FEV Knowledge Graph (Wave 1-4)
-
-**40 concepts across 4 scientific domains:**
-
-- **📐 Mathematics (10):** Reflexivity, Pythagorean, Commutative, Prime Numbers, Euler's Identity, Calculus
-- **⚛️ Physics (10):** Newton's Laws, E=mc², Heisenberg, Thermodynamics, Maxwell, Schrödinger
-- **🧬 Biology (10):** DNA, Central Dogma, Evolution, Mendel, Krebs Cycle, Photosynthesis
-- **🧪 Chemistry (10):** Periodic Table, Bonding, Stoichiometry, Redox, Equilibrium
-
-```python
-from venom.fev import FEVFoundation, MATH_BATCH_1
-foundation = FEVFoundation()
-foundation.load_batch(MATH_BATCH_1)
-concept = foundation.get_concept("MATH_002")  # Pythagorean Theorem
-```
-
----
-
-## Hardware Bridges (Wave 1-3)
-
-### 🪟 WMI Bridge - Windows Management Instrumentation
-```python
-from venom.hardware import WMIBridge
-bridge = WMIBridge()
-temp = bridge.get_cpu_temperature()
-```
-
-### 🎮 CUDA Bridge - NVIDIA GPU + Tensor Cores
-```python
-from venom.hardware import CUDABridge
-cuda = CUDABridge()
-info = cuda.get_gpu_info()
-has_tensor_cores = cuda.is_tensor_core_available()
-```
-
-### ☁️ TPU Bridge - Google Cloud TPU + JAX
-```python
-from venom.hardware import TPUBridge
-tpu = TPUBridge()
-topology = tpu.get_tpu_topology()
-```
-
----
-
-## Deployment & Orchestration (Wave 1-4)
-
-### 🌐 Edge Deployment + Load Balancing
-```python
-from venom.deployment import EdgeDeployer
-deployer = EdgeDeployer()
-target = deployer.deploy_with_load_balancing()
-```
-
-### 🗺️ Multi-Region + Haversine Routing
-```python
-from venom.deployment import MultiRegionManager
-manager = MultiRegionManager()
-nearest = manager.latency_based_routing(lat=51.5, lon=-0.1)
-```
-
-### ☸️ Kubernetes Auto-Scaling (HPA/VPA)
-```python
-from venom.deployment import K8sAutoscaler, HPAConfig
-autoscaler = K8sAutoscaler(namespace="venom-prod")
-autoscaler.configure_hpa("venom-arbiter", HPAConfig(min_replicas=3, max_replicas=50))
-```
-
----
-
-## Analytics & Intelligence (Wave 2-4)
-
-### 📊 Stream Analytics - Z-score Anomaly Detection
-```python
-from venom.analytics import StreamProcessor
-processor = StreamProcessor(window_size=100, anomaly_threshold=3.0)
-processor.push(value)
-```
-
-### 🔮 Predictive Analytics - ML Forecasting
-```python
-from venom.analytics import PredictiveModel
-model = PredictiveModel()
-prediction = model.forecast_threat(5.0)
-intervals = model.confidence_intervals(5.0, confidence=0.95)
-```
-
-### 💥 Chaos Engineering - Failure Injection
-```python
-from venom.testing import ChaosEngine
-engine = ChaosEngine()
-engine.inject_latency(target={"app": "venom"}, latency_ms=150)
-engine.inject_failure(target={"app": "venom"}, failure_type="pod_kill")
-```
-
-### 🛡️ Production Hardening - Security/Performance/Reliability
-```python
-from venom.ops import ProductionValidator
-validator = ProductionValidator()
-report = validator.generate_readiness_report()
-# Validates: CVE scan, TLS, P95 latency <100ms, uptime >99.9%
-```
-
----
-
-## Security & Operations (Stage 1)
-
-### 🔐 Ed25519 Ledger Signing
-```python
-from venom.security import LedgerSigner
-signer = LedgerSigner()
-signature = signer.sign_entry(data)
-```
-
-### 🔑 JWT Mesh Authentication
-```python
-from venom.security import MeshAuthenticator
-auth = MeshAuthenticator(secret="key")
-token = auth.generate_token(node_id="node-1")
-```
-
-### 💾 Backup Manager
-```python
-from venom.ops import BackupManager
-backup_mgr = BackupManager(ledger, backup_dir="./backups", enabled=True)
-```
-
-### 📝 Audit Trail (JSONL)
-```python
-from venom.ops import AuditTrail
-audit = AuditTrail(enabled=True, audit_file="./audit.jsonl")
-```
-
-### ⚡ Graceful Shutdown
-```python
-from venom.ops import GracefulShutdown
-shutdown = GracefulShutdown(arbiter)  # Handles SIGINT/SIGTERM
-```
-
----
-
-## Additional Tools
-
-### ⚡ Performance Benchmark
-```python
-from venom.benchmark import PerformanceBenchmark
-benchmark = PerformanceBenchmark()
-results = benchmark.run_benchmark(beats=100)
-```
-
-### 🔄 Load Testing
-```python
-from venom.testing import LoadTest
-load_test = LoadTest()
-results = load_test.run(concurrent_users=100, duration=60)
-```
-
-### 💻 CLI Dashboard (Rich)
-```python
-from venom.cli import Dashboard
-dashboard = Dashboard()
-dashboard.start()  # Interactive CLI dashboard
-```
-
----
-
-## Installation
+### Installation
 
 ```bash
+# Clone the repository
 git clone https://github.com/manuelstellian-dev/AIOS-.git
 cd AIOS-
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Install VENOM
 pip install -e .
 ```
 
-**Dependencies:**
-```
-torch>=2.0.0          # Neural networks
-numpy>=1.24.0         # Numerical computation
-cryptography>=41.0.0  # Ed25519 signing
-pyjwt>=2.8.0          # JWT authentication
-rich>=13.0.0          # CLI dashboard
-psutil>=5.9.0         # Hardware detection (NEW)
-networkx>=3.0         # Dependency graphs (NEW)
-```
-
----
-
-## 🚀 Quick Start with Ω-AIOS
-
-### 1. Scan Your Hardware
+### First Run
 
 ```bash
-python venom/hardware/universal_scanner.py
+# Check your system
+venom health check
+
+# Scan hardware capabilities
+venom-omega scan
+
+# List available modules
+venom modules list
+
+# Get help
+venom --help
 ```
-
-Output:
-```
-🌌 VENOM Ω-AIOS Universal Hardware Profile
-============================================================
-💻 CPU: 4 cores (AMD), 2645 MHz
-🧠 Memory: 15.6 GB total, 14.1 GB available
-📐 Möbius Parameters: N=4, Λ=200.0, P=0.700
-============================================================
-```
-
-### 2. Calculate Temporal Compression
-
-```bash
-python venom/sync/adaptive_mobius_engine.py
-```
-
-See speedup estimates for different hardware profiles.
-
-### 3. Run Parallel Wave Execution
-
-```python
-from venom.core.omega_arbiter import OmegaArbiter
-
-waves = [
-    {
-        'id': 'wave-1',
-        'name': 'Setup',
-        'tasks': [{'name': 'init', 'function': None}]
-    }
-]
-
-arbiter = OmegaArbiter(enable_omega=True)
-result = arbiter.execute_all_waves_parallel(waves)
-print(f"Completed in {result['total_execution_time']:.2f}s")
-```
-
-### 4. Monitor System Health (Theta)
-
-```python
-from venom.observability.theta_monitor import ThetaMonitor
-
-monitor = ThetaMonitor(interval=1.0)
-monitor.start_monitoring()
-monitor.print_status()
-```
-
----
-
-## Quick Start (Legacy VENOM Λ-GENESIS)
 
 ### Basic Usage
-```python
-from venom import Arbiter, TLambdaPulse, GenomicPID, EntropyModel, ImmutableLedger
 
+```python
+from venom.core import Arbiter, TLambdaPulse, GenomicPID
+from venom.inference import EntropyModel
+from venom.ledger import ImmutableLedger
+
+# Initialize components
+pulse = TLambdaPulse(k=4, p=5, t1=0.001)
+pid = GenomicPID(kp=0.6, ki=0.1, kd=0.05)
+entropy = EntropyModel(ml_weight=0.12)
+ledger = ImmutableLedger()
+
+# Create and start arbiter
 arbiter = Arbiter(
-    pulse=TLambdaPulse(k=4, p=5, t1=0.001),
-    pid=GenomicPID(kp=0.6, ki=0.1, kd=0.05),
-    entropy_model=EntropyModel(ml_weight=0.12),
-    ledger=ImmutableLedger()
+    pulse=pulse,
+    pid=pid,
+    entropy_model=entropy,
+    ledger=ledger
 )
+
 arbiter.start(beats=10)
 ```
 
-### Command Line
+---
+
+## 🚀 Key Capabilities
+
+### 1. AI & Machine Learning
+
 ```bash
-# Basic run
-python main.py --beats 10
+# Train a model
+venom ai train --model transformer --data ./data/training.csv
 
-# With security features
-python main.py --beats 100 --sign-ledger --mesh-auth --audit-trail
-
-# With P2P mesh
-python main.py --beats -1 --mesh --mesh-port 9000
-
-# With backup
-python main.py --enable-backup --backup-dir ./backups
+# Run predictions
+venom ai predict --model ./models/my_model.pt --input "sample text"
 ```
 
-### CLI Flags
+```python
+from venom.ml import AutoMLPipeline, ModelServer
+
+# AutoML with hyperparameter tuning
+pipeline = AutoMLPipeline(framework='optuna')
+best_params = pipeline.tune_hyperparameters(
+    objective_fn=my_objective,
+    search_space={'lr': (0.001, 0.1), 'layers': (2, 10)},
+    n_trials=100
+)
+
+# Serve models
+server = ModelServer(port=8080)
+server.load_model('my_model', './models/model.pt')
+server.start()
 ```
---beats N              Number of beats (-1 for infinite)
---k-flows N            Parallel flows (default: 4)
---p-nodes N            Initial nodes (default: 5)
---mesh                 Enable P2P mesh
---mesh-port N          Mesh port (default: 9000)
---enable-backup        Enable automatic backups
---sign-ledger          Enable Ed25519 signing
---mesh-auth            Enable JWT authentication
---audit-trail          Enable audit logging
+
+### 2. Security & Encryption
+
+```bash
+# Encrypt a file
+venom security encrypt --file secret.txt
+
+# Scan for security issues
+venom security scan --path ./src
+```
+
+```python
+from venom.security import AdvancedEncryption, LedgerSigner
+
+# Encrypt data
+encryption = AdvancedEncryption(algorithm='aes-gcm')
+key = encryption.generate_key()
+encrypted, nonce = encryption.encrypt(b"sensitive data", key)
+
+# Sign with Ed25519
+signer = LedgerSigner()
+signature = signer.sign_entry({"data": "important"})
+```
+
+### 3. Multi-Cloud Deployment
+
+```bash
+# Deploy to AWS
+venom cloud deploy --provider aws --config ./deploy/aws.json
+
+# Check deployment status
+venom cloud status
+```
+
+```python
+from venom.cloud.aws import EKSDeployer
+from venom.cloud.gcp import GKEDeployer
+from venom.cloud.azure import AKSDeployer
+
+# Deploy to AWS EKS
+deployer = EKSDeployer(cluster_name="venom-prod", region="us-east-1")
+deployer.deploy(manifest_path="./k8s/deployment.yaml")
+
+# Deploy to GCP GKE
+deployer = GKEDeployer(cluster_name="venom-prod", zone="us-central1-a")
+deployer.deploy(manifest_path="./k8s/deployment.yaml")
+```
+
+### 4. Knowledge Management
+
+```bash
+# Add documents
+venom knowledge add --doc ./docs/guide.md --metadata '{"category":"docs"}'
+
+# Search
+venom knowledge search --query "deployment guide"
+```
+
+```python
+from venom.knowledge import DocumentStore, SemanticSearch, KnowledgeGraph
+
+# Store documents
+store = DocumentStore()
+doc_id = store.add_document(
+    "VENOM is a universal AI OS",
+    {"category": "system", "version": "1.0"}
+)
+
+# Semantic search
+search = SemanticSearch()
+results = search.search("AI operating system", top_k=5)
+
+# Knowledge graph
+graph = KnowledgeGraph()
+graph.add_node("ai", {"type": "concept"})
+graph.add_node("ml", {"type": "concept"})
+graph.add_edge("ai", "ml", {"relation": "includes"})
+```
+
+### 5. Observability & Monitoring
+
+```bash
+# Health check
+venom health check
+
+# View metrics
+venom health metrics
+
+# Real-time monitoring
+venom-omega monitor --duration 30
+```
+
+```python
+from venom.observability import ThetaMonitor
+import time
+
+# Monitor system health
+monitor = ThetaMonitor(interval=1.0)
+monitor.start_monitoring()
+
+time.sleep(10)
+status = monitor.get_current_status()
+print(f"System Theta: {status['theta']:.3f}")
+
+monitor.stop_monitoring()
+```
+
+### 6. Temporal Compression (Möbius Engine)
+
+The VENOM Ω-AIOS upgrade provides temporal compression with adaptive speedup:
+
+```bash
+# Calculate compression for workload
+venom-omega compress 840  # 840 hours → X hours
+
+# Run with Möbius optimization
+venom-omega benchmark
+```
+
+**Performance by Device:**
+- **Raspberry Pi 4**: 50-150x speedup (840h → 5.6h)
+- **Laptop (8 cores)**: 1,000-3,000x speedup (840h → 17 min)
+- **Cloud (32 cores)**: 10,000-50,000x speedup (840h → 2 min)
+
+---
+
+## 📚 Documentation
+
+### Core Documentation
+- [Installation Guide](docs/installation.md)
+- [Quick Start Guide](docs/quickstart.md)
+- [CLI Reference](docs/cli.md)
+- [Architecture Overview](ARCHITECTURE.md)
+
+### Module Documentation
+- [AI & ML](docs/modules/ai_ml.md)
+- [Hardware Bridges](docs/modules/hardware.md)
+- [Cloud Deployment](docs/modules/cloud.md)
+- [Security](docs/modules/security.md)
+- [Knowledge Management](docs/modules/knowledge.md)
+- [Observability](docs/modules/observability.md)
+- [Integrations](docs/modules/integrations.md)
+- [Analytics](docs/modules/analytics.md)
+
+### Advanced Topics
+- [Möbius Engine](docs/MOBIUS_ENGINE.md)
+- [Universal Deployment](docs/UNIVERSAL_DEPLOYMENT.md)
+- [API Reference](docs/api/)
+- [Code Examples](docs/examples/)
+
+### Release Notes
+- [Changelog](CHANGELOG.md)
+- [Security Summary](SECURITY_SUMMARY.md)
+
+---
+
+## 🏗️ Architecture
+
+VENOM is a **fractal organism** with Lyapunov stability and continuous recalibration:
+
+### Core Components
+
+1. **Arbiter** - Decision-making brain with parallel execution
+2. **T_Λ Pulse** - Time compression engine
+3. **Genomic PID** - Stability controller (ΔV < 0)
+4. **Four Cores** - RegenCore, BalanceCore, EntropyCore, OptimizeCore
+5. **Entropy Model** - Neural network for threat prediction
+6. **Immutable Ledger** - SHA3-256 blockchain
+7. **P2P Mesh** - Distributed nanobot network
+8. **Observability** - Prometheus metrics and health checks
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    VENOM Framework                       │
+├─────────────────────────────────────────────────────────┤
+│  CLI Layer                                               │
+│  ├── venom (main CLI)                                   │
+│  └── venom-omega (Ω-AIOS CLI)                          │
+├─────────────────────────────────────────────────────────┤
+│  Application Layer                                       │
+│  ├── AI/ML       ├── Security    ├── Knowledge         │
+│  ├── Cloud       ├── Analytics   ├── Integrations      │
+├─────────────────────────────────────────────────────────┤
+│  Core Layer                                              │
+│  ├── Arbiter     ├── Pulse       ├── PID               │
+│  ├── Cores       ├── Entropy     ├── Ledger            │
+├─────────────────────────────────────────────────────────┤
+│  Infrastructure Layer                                    │
+│  ├── Hardware    ├── Deployment  ├── Observability     │
+│  ├── Mesh        ├── Ops         ├── Testing           │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Docker & Kubernetes
+## 🛠️ CLI Reference
 
-### Docker
+### Main Commands
+
 ```bash
-docker build -t venom:latest .
-docker run -p 8000:8000 venom:latest
+# Version and help
+venom --version
+venom --help
+
+# Module management
+venom modules list
+venom modules info <module_name>
+
+# AI/ML operations
+venom ai train --model <type> --data <path>
+venom ai predict --model <path> --input <data>
+
+# Security operations
+venom security encrypt --file <path>
+venom security scan --path <directory>
+
+# Cloud operations
+venom cloud deploy --provider <aws|gcp|azure> --config <path>
+venom cloud status
+
+# Knowledge base
+venom knowledge add --doc <path> --metadata <json>
+venom knowledge search --query "<text>"
+
+# Health and monitoring
+venom health check
+venom health metrics
 ```
 
-### Docker Compose (Full Stack: venom + prometheus + grafana)
+### Omega CLI (Ω-AIOS)
+
 ```bash
+# Hardware and system
+venom-omega scan
+venom-omega config
+
+# Temporal compression
+venom-omega compress <hours>
+
+# Performance
+venom-omega benchmark
+venom-omega monitor --duration <seconds>
+```
+
+---
+
+## 🧪 Testing
+
+### Run Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run specific test suites
+pytest tests/test_integration.py
+pytest tests/integration/
+pytest tests/performance/
+
+# Run with coverage
+pytest --cov=venom --cov-report=html
+
+# Run specific test categories
+pytest -k "test_ai"
+pytest -k "test_security"
+```
+
+### Test Structure
+
+```
+tests/
+├── Unit tests (test_*.py)
+├── integration/
+│   └── test_end_to_end.py      # 10 integration tests
+├── performance/
+│   └── test_benchmarks.py      # 5 performance benchmarks
+└── Specialized tests
+    ├── test_chaos_engineering.py
+    ├── test_production_hardening.py
+    └── ...
+```
+
+### Chaos Engineering
+
+```python
+from venom.testing import ChaosEngine
+
+engine = ChaosEngine()
+
+# Inject failures
+engine.inject_latency(target={"app": "venom"}, latency_ms=150)
+engine.inject_failure(target={"app": "venom"}, failure_type="pod_kill")
+
+# Verify resilience
+engine.verify_recovery()
+```
+
+---
+
+## 🐳 Docker & Kubernetes
+
+### Docker
+
+```bash
+# Build image
+docker build -t venom:1.0.0 .
+
+# Run container
+docker run -p 8000:8000 venom:1.0.0
+
+# Use Docker Compose
 docker-compose up -d
-# Access:
-# - VENOM: http://localhost:8000/metrics
-# - Prometheus: http://localhost:9090
-# - Grafana: http://localhost:3000 (admin/venom)
 ```
 
 ### Kubernetes
+
 ```bash
+# Deploy
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/svc.yaml
+
+# Check status
+kubectl get pods -l app=venom
 kubectl get hpa venom-genesis-hpa
+
+# Scale
+kubectl scale deployment venom-genesis --replicas=5
 ```
 
-**HPA:** Min 1, Max 10 replicas, Target CPU 50%
+**Auto-scaling**: HPA configured for min 1, max 10 replicas @ 50% CPU
 
 ---
 
-## Wave 1-4 Summary
+## 📊 Observability
 
-| Wave | Features | Tests |
-|---|---|---|
-| **Wave 1** | Math FEV (10) + Edge Deploy + WMI | 9 |
-| **Wave 2** | Physics FEV (10) + CUDA + Stream Analytics | 21 |
-| **Wave 3** | Biology FEV (10) + Multi-region + TPU + Predictive | 18 |
-| **Wave 4** | Chemistry FEV (10) + K8s + Chaos + Hardening | 22 |
+### Prometheus Metrics
 
-**Total:** 40 FEV concepts, 16 features, 70+ new tests (126 total)
-
----
-
-## Project Structure
+Available at `http://localhost:8000/metrics`:
 
 ```
-venom/
-├── core/              # Arbiter, constants
-├── flows/             # R, B, E, O cores
-├── sync/              # T_Λ pulse
-├── control/           # Genomic PID
-├── inference/         # Entropy model
-├── ledger/            # SHA3-256 blockchain
-├── mesh/              # P2P mesh
-├── observability/     # Prometheus + health
-├── fev/               # 🆕 40 FEV concepts (13KB)
-├── hardware/          # 🆕 WMI (2.4KB) + CUDA (4.8KB) + TPU (7.7KB)
-├── deployment/        # 🆕 Edge (4.3KB) + Multi-region (7.8KB) + K8s (9.5KB)
-├── analytics/         # 🆕 Streaming (5.1KB) + Predictive (8.2KB)
-├── testing/           # 🆕 Chaos (15.6KB) + Load test (2.6KB)
-├── ops/               # 🆕 Hardening (21.6KB) + Backup (4.9KB) + Audit (5.3KB) + Shutdown (3.6KB)
-├── security/          # 🆕 Ed25519 (6.3KB) + JWT (4.5KB)
-├── benchmark/         # 🆕 Performance (2.8KB)
-└── cli/               # 🆕 Dashboard (4.1KB)
-
-tests/                 # 126 tests
-k8s/                   # Kubernetes configs
-ARCHITECTURE.md        # Detailed docs (14.5KB)
-example.py             # Demo (4.9KB)
-main.py                # Entry point (6.2KB)
-docker-compose.yml     # Full stack
-```
-
----
-
-## Testing
-
-```bash
-pytest                              # All 126 tests
-pytest tests/test_chaos_engineering.py
-pytest --cov=venom --cov-report=html
-```
-
----
-
-## Observability
-
-### Prometheus Metrics (port 8000)
-```
-venom_beats_total
-venom_threat_score
-venom_pid_error
-venom_beat_duration_seconds
+venom_beats_total              # Total beats executed
+venom_threat_score             # Current threat score
+venom_pid_error                # PID controller error
+venom_beat_duration_seconds    # Beat execution time
+venom_theta                    # System health (0-1)
 ```
 
 ### Health Check
+
 ```bash
 curl http://localhost:8000/health
-# {"status":"healthy"}
+# {"status": "healthy", "timestamp": "2024-11-01T12:00:00Z"}
+```
+
+### Grafana Dashboard
+
+Access at `http://localhost:3000` (credentials: admin/venom)
+
+Pre-configured dashboards:
+- System Health Overview
+- Performance Metrics
+- Security Events
+- Resource Utilization
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes**
+4. **Run tests**: `pytest`
+5. **Commit**: `git commit -m 'Add amazing feature'`
+6. **Push**: `git push origin feature/amazing-feature`
+7. **Open a Pull Request**
+
+### Code Standards
+
+- Follow PEP 8 style guidelines
+- Add docstrings to all functions/classes
+- Write tests for new features
+- Maintain Lyapunov stability (ΔV < 0)
+- Ensure ledger immutability
+
+### Development Setup
+
+```bash
+# Install dev dependencies
+pip install -r requirements.txt
+pip install pytest pytest-cov black flake8
+
+# Run linters
+black venom/
+flake8 venom/
+
+# Run tests
+pytest --cov=venom
 ```
 
 ---
 
-## Contributing
+## 📜 License
 
-Contributions should maintain:
-- Lyapunov stability (ΔV < 0)
-- Parallel execution consistency
-- Ledger immutability
-- PID control precision
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## License
+## 🙏 Acknowledgments
 
-See LICENSE file.
-
----
-
-## References
-
-- **Lyapunov Stability**: System convergence (ΔV < 0)
-- **Fractal Architecture**: Self-similar patterns
-- **Time Compression**: T_Λ formula for WPS
-- **Blockchain**: SHA3-256 immutable ledger
-- **Ed25519**: High-security signatures
-- **JWT**: JSON Web Tokens
+- **Lyapunov Theory**: System stability framework
+- **Fractal Architecture**: Self-similar organizational patterns
+- **Temporal Compression**: Mathematical optimization foundations
+- **Cryptography**: Ed25519, AES-GCM implementations
+- **Open Source Community**: Libraries and tools that made this possible
 
 ---
 
-**VENOM Λ-GENESIS v0.1.0** - Production-ready autonomous AI OS with 30 features, 40-concept knowledge graph, and comprehensive deployment capabilities.
+## 📞 Support
+
+- **Documentation**: [Full docs](docs/)
+- **Issues**: [GitHub Issues](https://github.com/manuelstellian-dev/AIOS-/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/manuelstellian-dev/AIOS-/discussions)
+
+---
+
+## 🎯 Roadmap
+
+### Current: v1.0.0 ✅
+- ✅ Complete CLI interface
+- ✅ Comprehensive test suite
+- ✅ Full documentation
+- ✅ Multi-cloud support
+- ✅ Security hardening
+
+### Future: v1.1.0
+- [ ] GraphQL API
+- [ ] Web UI dashboard
+- [ ] Advanced AutoML
+- [ ] Multi-modal models
+- [ ] Enhanced observability
+
+### Future: v2.0.0
+- [ ] Distributed training
+- [ ] Edge AI optimization
+- [ ] Quantum-ready cryptography
+- [ ] Autonomous scaling
+- [ ] Federated learning
+
+---
+
+**VENOM Framework v1.0.0** - Production-ready Universal AI Operating System
+
+*Built with ❤️ for the AI community*
