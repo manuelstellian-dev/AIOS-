@@ -141,6 +141,13 @@ class PredictiveEngine:
             ss_res = np.sum((y - y_pred) ** 2)
             r2 = 1 - (ss_res / ss_tot) if ss_tot != 0 else 0.0
             
+            # Set model attribute for consistency
+            self.model = {
+                'type': 'linear',
+                'weights': self.weights,
+                'bias': self.bias
+            }
+            
             return {
                 'mse': mse,
                 'rmse': mse ** 0.5,
@@ -172,6 +179,13 @@ class PredictiveEngine:
                 
                 mse = statistics.mean(squared_errors)
                 mae = statistics.mean(errors)
+                
+                # Set model attribute for consistency
+                self.model = {
+                    'type': 'linear',
+                    'weights': self.weights,
+                    'bias': self.bias
+                }
                 
                 return {
                     'mse': mse,
@@ -298,10 +312,11 @@ class PredictiveEngine:
             X: Features to predict (numpy array or list)
             
         Returns:
-            Predictions (numpy array or list)
+            Predictions (numpy array or list), or None if not trained
         """
         if not self.trained:
-            raise RuntimeError("Must call train() before predict()")
+            logger.warning("Model not trained, returning None")
+            return None
         
         if HAS_NUMPY:
             if not isinstance(X, np.ndarray):
@@ -433,30 +448,39 @@ class PredictiveEngine:
         
         return {}
     
-    def save_model(self, path: str) -> None:
+    def save_model(self, path: str) -> bool:
         """
         Save model to file
         
         Args:
             path: Path to save the model
+            
+        Returns:
+            True if successful, False otherwise
         """
         if not self.trained:
-            raise RuntimeError("Must call train() before save_model()")
+            logger.warning("Model not trained, cannot save")
+            return False
         
-        model_data = {
-            'model_type': self.model_type,
-            'trained': self.trained,
-            'is_classifier': self.is_classifier,
-            'feature_names': self.feature_names,
-            'weights': self.weights,
-            'bias': self.bias,
-            'model': self.model
-        }
-        
-        with open(path, 'wb') as f:
-            pickle.dump(model_data, f)
-        
-        logger.info(f"Model saved to {path}")
+        try:
+            model_data = {
+                'model_type': self.model_type,
+                'trained': self.trained,
+                'is_classifier': self.is_classifier,
+                'feature_names': self.feature_names,
+                'weights': self.weights,
+                'bias': self.bias,
+                'model': self.model
+            }
+            
+            with open(path, 'wb') as f:
+                pickle.dump(model_data, f)
+            
+            logger.info(f"Model saved to {path}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save model: {e}")
+            return False
     
     def load_model(self, path: str) -> None:
         """
@@ -477,3 +501,236 @@ class PredictiveEngine:
         self.model = model_data['model']
         
         logger.info(f"Model loaded from {path}")
+    
+    def save(self, path: str) -> bool:
+        """
+        Save model to file (alias for save_model)
+        
+        Args:
+            path: Path to save the model
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            self.save_model(path)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save model: {e}")
+            return False
+    
+    def load(self, path: str) -> bool:
+        """
+        Load model from file (alias for load_model)
+        
+        Args:
+            path: Path to load the model from
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            self.load_model(path)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to load model: {e}")
+            return False
+    
+    def get_feature_importance(self):
+        """
+        Get feature importance (for tree-based models)
+        
+        Returns:
+            Array/list of feature importances or None
+        """
+        if not self.trained:
+            return None
+        
+        if self.model_type in ['random_forest', 'xgboost']:
+            if self.model is not None and hasattr(self.model, 'feature_importances_'):
+                importances = self.model.feature_importances_
+                
+                # Return as list for compatibility
+                if HAS_NUMPY and isinstance(importances, np.ndarray):
+                    return importances.tolist()
+                return list(importances) if hasattr(importances, '__iter__') else None
+        
+        return None
+    
+    def set_hyperparameters(self, params: Dict = None, **kwargs) -> None:
+        """
+        Set hyperparameters for the model
+        
+        Args:
+            params: Dictionary of hyperparameters (optional)
+            **kwargs: Hyperparameter key-value pairs
+        """
+        # Store hyperparameters
+        if not hasattr(self, 'hyperparameters'):
+            self.hyperparameters = {}
+        
+        # Handle both dict and kwargs
+        if params is not None:
+            self.hyperparameters.update(params)
+        if kwargs:
+            self.hyperparameters.update(kwargs)
+        
+        logger.info(f"Hyperparameters set: {self.hyperparameters}")
+    
+    def get_hyperparameters(self) -> Dict:
+        """
+        Get current hyperparameters
+        
+        Returns:
+            Dictionary of hyperparameters
+        """
+        if hasattr(self, 'hyperparameters'):
+            return self.hyperparameters.copy()
+        return {}
+    
+    def cross_validate(self, X, y, cv: int = 5) -> Optional[Dict]:
+        """
+        Perform cross-validation
+        
+        Args:
+            X: Features
+            y: Targets
+            cv: Number of cross-validation folds
+            
+        Returns:
+            Dictionary with CV scores or None
+        """
+        if not HAS_SKLEARN:
+            logger.warning("scikit-learn not available for cross-validation")
+            return None
+        
+        if not HAS_NUMPY:
+            logger.warning("NumPy not available for cross-validation")
+            return None
+        
+        try:
+            # Convert to numpy
+            if not isinstance(X, np.ndarray):
+                X = np.array(X)
+            if not isinstance(y, np.ndarray):
+                y = np.array(y)
+            
+            if X.ndim == 1:
+                X = X.reshape(-1, 1)
+            
+            # Create a temporary model
+            if self.model_type == 'random_forest':
+                if self.is_classifier:
+                    model = RandomForestClassifier(random_state=42)
+                else:
+                    model = RandomForestRegressor(random_state=42)
+            else:
+                # Use random forest as default
+                model = RandomForestRegressor(random_state=42)
+            
+            scores = cross_val_score(model, X, y, cv=cv)
+            
+            return {
+                'scores': scores.tolist(),
+                'mean': float(np.mean(scores)),
+                'std': float(np.std(scores))
+            }
+        except Exception as e:
+            logger.error(f"Cross-validation failed: {e}")
+            return None
+    
+    def grid_search(self, X, y, param_grid: Dict) -> Optional[Dict]:
+        """
+        Perform grid search for hyperparameters
+        
+        Args:
+            X: Features
+            y: Targets
+            param_grid: Parameter grid to search
+            
+        Returns:
+            Dictionary with best parameters or None
+        """
+        if not HAS_SKLEARN:
+            logger.warning("scikit-learn not available for grid search")
+            return None
+        
+        if not HAS_NUMPY:
+            logger.warning("NumPy not available for grid search")
+            return None
+        
+        try:
+            from sklearn.model_selection import GridSearchCV
+            
+            # Convert to numpy
+            if not isinstance(X, np.ndarray):
+                X = np.array(X)
+            if not isinstance(y, np.ndarray):
+                y = np.array(y)
+            
+            if X.ndim == 1:
+                X = X.reshape(-1, 1)
+            
+            # Create a temporary model
+            if self.model_type == 'random_forest':
+                if self.is_classifier:
+                    model = RandomForestClassifier(random_state=42)
+                else:
+                    model = RandomForestRegressor(random_state=42)
+            else:
+                model = RandomForestRegressor(random_state=42)
+            
+            grid_search = GridSearchCV(model, param_grid, cv=3)
+            grid_search.fit(X, y)
+            
+            return {
+                'best_params': grid_search.best_params_,
+                'best_score': float(grid_search.best_score_)
+            }
+        except Exception as e:
+            logger.error(f"Grid search failed: {e}")
+            return None
+    
+    def scale_features(self, X, fit: bool = True):
+        """
+        Scale features using standardization
+        
+        Args:
+            X: Features to scale
+            fit: Whether to fit the scaler
+            
+        Returns:
+            Scaled features
+        """
+        if not HAS_SKLEARN:
+            logger.warning("scikit-learn not available for feature scaling")
+            return X
+        
+        if not HAS_NUMPY:
+            logger.warning("NumPy not available for feature scaling")
+            return X
+        
+        try:
+            from sklearn.preprocessing import StandardScaler
+            
+            # Convert to numpy
+            if not isinstance(X, np.ndarray):
+                X = np.array(X)
+            
+            if X.ndim == 1:
+                X = X.reshape(-1, 1)
+            
+            if fit:
+                self.scaler = StandardScaler()
+                X_scaled = self.scaler.fit_transform(X)
+            else:
+                if hasattr(self, 'scaler'):
+                    X_scaled = self.scaler.transform(X)
+                else:
+                    logger.warning("Scaler not fitted, returning original features")
+                    X_scaled = X
+            
+            return X_scaled
+        except Exception as e:
+            logger.error(f"Feature scaling failed: {e}")
+            return X

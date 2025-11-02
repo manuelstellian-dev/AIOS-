@@ -54,8 +54,12 @@ jobs:
         # Install lightweight CPU-only torch (not GPU version)
         pip install torch --index-url https://download.pytorch.org/whl/cpu
         pip install torchvision --index-url https://download.pytorch.org/whl/cpu
-        # Skip heavy ML dependencies (transformers, optuna)
-        # ML tests will skip gracefully if dependencies unavailable
+        # Install ML dependencies for transformer tests
+        pip install transformers>=4.48.0
+        pip install tokenizers>=0.13.0
+        pip install sentencepiece>=0.1.99
+        pip install accelerate>=0.20.0
+        pip install optuna>=3.0.0
         pip install -e . --no-deps
     
     - name: Lint with flake8 (if installed)
@@ -113,8 +117,12 @@ jobs:
         # Install lightweight CPU-only torch (not GPU version)
         pip install torch --index-url https://download.pytorch.org/whl/cpu
         pip install torchvision --index-url https://download.pytorch.org/whl/cpu
-        # Skip heavy ML dependencies (transformers, optuna)
-        # ML tests will skip gracefully if dependencies unavailable
+        # Install ML dependencies for transformer tests
+        pip install transformers>=4.48.0
+        pip install tokenizers>=0.13.0
+        pip install sentencepiece>=0.1.99
+        pip install accelerate>=0.20.0
+        pip install optuna>=3.0.0
         pip install -e . --no-deps
     
     - name: Run integration tests

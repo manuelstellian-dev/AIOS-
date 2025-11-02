@@ -41,9 +41,9 @@ class TestTransformerBridgeModelLoading:
         mock_tokenizer.from_pretrained.return_value = Mock()
         
         bridge = TransformerBridge()
-        result = bridge.load_model("bert-base-uncased")
+        result = bridge.load_model("prajjwal1/bert-tiny")
         
-        assert result is not None or bridge.models.get("bert-base-uncased") is not None
+        assert result is not None or bridge.models.get("prajjwal1/bert-tiny") is not None
     
     def test_load_model_without_transformers(self):
         """Test loading model without transformers library"""
