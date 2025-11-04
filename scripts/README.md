@@ -26,7 +26,9 @@ The `verification_agent.py` script is a comprehensive automated testing and veri
 python scripts/verification_agent.py
 ```
 
-This runs a quick verification with the default coverage threshold of 97%.
+This runs a quick verification with the **Enterprise-grade coverage threshold of 97%**.
+
+⚠️ **Important:** 97% coverage is mandatory for all production code. This is not negotiable.
 
 #### Full Verification with Static Analysis
 
@@ -42,10 +44,10 @@ This runs the complete verification suite including:
 #### Custom Coverage Threshold
 
 ```bash
-python scripts/verification_agent.py --coverage-threshold 85
+python scripts/verification_agent.py --coverage-threshold 97
 ```
 
-Set a custom coverage threshold (useful during development).
+Set a custom coverage threshold. **Default is 97% for Enterprise-grade quality.**
 
 #### Combined Options
 
@@ -93,7 +95,7 @@ The workflow runs automatically on:
 Before committing code, run a quick verification:
 
 ```bash
-python scripts/verification_agent.py --coverage-threshold 80
+python scripts/verification_agent.py --coverage-threshold 97
 ```
 
 #### Example 2: Full Quality Check
@@ -177,10 +179,14 @@ pip install -r requirements.txt
 
 #### Issue: Coverage is below threshold
 
-**Solution**: Add more tests or lower the threshold during development:
+**Solution**: Add more tests to meet the 97% Enterprise-grade requirement:
 
 ```bash
-python scripts/verification_agent.py --coverage-threshold 70
+# Generate missing tests automatically
+python scripts/auto_generate_tests.py --max-files 20
+
+# Run verification to check progress
+python scripts/verification_agent.py --coverage-threshold 97
 ```
 
 #### Issue: Static analysis tools not found

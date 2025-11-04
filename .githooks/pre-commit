@@ -1,0 +1,20 @@
+#!/bin/bash
+# Pre-commit hook for Enterprise-grade quality checks
+# 
+# To install this hook:
+#   chmod +x .githooks/pre-commit
+#   git config core.hooksPath .githooks
+
+echo "🔍 Running Enterprise-grade pre-commit checks..."
+
+# Run verification with 97% threshold
+python scripts/verification_agent.py --coverage-threshold 97
+
+if [ $? -ne 0 ]; then
+    echo "❌ Pre-commit checks failed! Coverage below 97% or quality issues detected."
+    echo "📊 Run 'python scripts/verification_agent.py --full-check --coverage-threshold 97' for details"
+    exit 1
+fi
+
+echo "✅ Pre-commit checks passed! Code meets Enterprise-grade standards."
+exit 0
