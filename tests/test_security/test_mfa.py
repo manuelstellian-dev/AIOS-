@@ -112,3 +112,42 @@ def test_time_drift_tolerance():
     
     # Verify current token works
     assert totp_obj.verify(current_token, valid_window=1)
+
+
+def test_verify_totp_with_invalid_secret():
+    """Test TOTP verification with malformed secret"""
+    mfa = MFAManager()
+    
+    # Test with invalid/malformed secret that causes exception
+    assert not mfa.verify_totp("invalid_secret", "123456")
+    assert not mfa.verify_totp("", "123456")
+
+
+def test_verify_backup_code_with_invalid_hash():
+    """Test backup code verification with invalid hashed codes"""
+    mfa = MFAManager()
+    
+    # Generate valid backup codes
+    codes = mfa.generate_backup_codes(3)
+    hashed_codes = [mfa.hash_backup_code(code) for code in codes]
+    
+    # Add an invalid hash that will cause exception
+    invalid_hashes = hashed_codes + ["invalid_hash_format", "not_a_bcrypt_hash"]
+    
+    # Should still handle gracefully and return False
+    assert not mfa.verify_backup_code("INVALID1", invalid_hashes)
+    
+    # Valid code should still work even with invalid hashes in list
+    assert mfa.verify_backup_code(codes[0], invalid_hashes)
+
+
+def test_generate_qr_code_with_invalid_path():
+    """Test QR code generation with invalid path"""
+    mfa = MFAManager()
+    
+    secret = mfa.generate_secret()
+    uri = mfa.get_provisioning_uri(secret, "test@example.com")
+    
+    # Test with invalid path that will cause exception
+    with pytest.raises(Exception):
+        mfa.generate_qr_code(uri, "/invalid/path/that/does/not/exist/qr.png")
