@@ -1,6 +1,7 @@
 """Tests for GCP Cloud Functions Handler"""
 import pytest
 import json
+from unittest.mock import Mock, patch
 
 # Try to import GCP modules
 try:
@@ -17,6 +18,14 @@ except ImportError:
     GCP_FUNCTIONS_AVAILABLE = False
     cloud_function_handler = None
     CloudFunctionsDeployer = None
+
+
+@pytest.fixture
+def mock_functions_client():
+    """Fixture to mock GCP Functions client"""
+    with patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient') as mock:
+        mock.return_value = Mock()
+        yield mock
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
@@ -54,7 +63,7 @@ def test_benchmark_gcp():
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-def test_cloud_functions_deployer_init():
+def test_cloud_functions_deployer_init(mock_functions_client):
     """Test Cloud Functions deployer initialization"""
     deployer = CloudFunctionsDeployer(
         project_id='test-project',
@@ -66,7 +75,7 @@ def test_cloud_functions_deployer_init():
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-def test_cloud_functions_deployer_methods():
+def test_cloud_functions_deployer_methods(mock_functions_client):
     """Test Cloud Functions deployer has required methods"""
     deployer = CloudFunctionsDeployer(project_id='test-project')
     
@@ -78,7 +87,7 @@ def test_cloud_functions_deployer_methods():
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-def test_create_function_mock():
+def test_create_function_mock(mock_functions_client):
     """Test function creation (mock)"""
     deployer = CloudFunctionsDeployer(project_id='test-project')
     
@@ -86,7 +95,7 @@ def test_create_function_mock():
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-def test_invoke_mock():
+def test_invoke_mock(mock_functions_client):
     """Test function invocation (mock)"""
     deployer = CloudFunctionsDeployer(project_id='test-project')
     

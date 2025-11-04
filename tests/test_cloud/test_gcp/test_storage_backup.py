@@ -1,5 +1,6 @@
 """Tests for GCP Storage Backup Manager"""
 import pytest
+from unittest.mock import Mock, patch
 
 # Try to import GCP modules and ledger
 try:
@@ -13,8 +14,16 @@ except ImportError:
     ImmutableLedger = None
 
 
+@pytest.fixture
+def mock_storage_client():
+    """Fixture to mock GCP Storage client"""
+    with patch('venom.cloud.gcp.storage_backup.storage.Client') as mock:
+        mock.return_value = Mock()
+        yield mock
+
+
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-def test_storage_backup_manager_init():
+def test_storage_backup_manager_init(mock_storage_client):
     """Test Storage backup manager initialization"""
     manager = StorageBackupManager(
         bucket_name='test-bucket',
@@ -26,7 +35,7 @@ def test_storage_backup_manager_init():
 
 
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-def test_storage_backup_manager_methods():
+def test_storage_backup_manager_methods(mock_storage_client):
     """Test Storage backup manager has required methods"""
     manager = StorageBackupManager(
         bucket_name='test-bucket',
@@ -42,7 +51,7 @@ def test_storage_backup_manager_methods():
 
 
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-def test_backup_ledger_mock():
+def test_backup_ledger_mock(mock_storage_client):
     """Test ledger backup (mock)"""
     manager = StorageBackupManager(
         bucket_name='test-bucket',
@@ -56,7 +65,7 @@ def test_backup_ledger_mock():
 
 
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-def test_list_backups_mock():
+def test_list_backups_mock(mock_storage_client):
     """Test listing backups (mock)"""
     manager = StorageBackupManager(
         bucket_name='test-bucket',
@@ -67,7 +76,7 @@ def test_list_backups_mock():
 
 
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-def test_backup_state_method():
+def test_backup_state_method(mock_storage_client):
     """Test state backup method exists"""
     manager = StorageBackupManager(
         bucket_name='test-bucket',

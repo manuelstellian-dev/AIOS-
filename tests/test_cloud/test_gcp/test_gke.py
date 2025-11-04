@@ -1,5 +1,6 @@
 """Tests for GCP GKE Deployer"""
 import pytest
+from unittest.mock import Mock, patch
 
 # Try to import GCP modules
 try:
@@ -11,8 +12,16 @@ except ImportError:
     GKEDeployer = None
 
 
+@pytest.fixture
+def mock_container_client():
+    """Fixture to mock GCP Container client"""
+    with patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient') as mock:
+        mock.return_value = Mock()
+        yield mock
+
+
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-def test_gke_deployer_init():
+def test_gke_deployer_init(mock_container_client):
     """Test GKE deployer initialization"""
     deployer = GKEDeployer(
         project_id='test-project',
@@ -26,7 +35,7 @@ def test_gke_deployer_init():
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-def test_gke_deployer_methods():
+def test_gke_deployer_methods(mock_container_client):
     """Test GKE deployer has required methods"""
     deployer = GKEDeployer(
         project_id='test-project',
@@ -42,7 +51,7 @@ def test_gke_deployer_methods():
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-def test_create_cluster_mock():
+def test_create_cluster_mock(mock_container_client):
     """Test cluster creation (mock)"""
     deployer = GKEDeployer(project_id='test-project')
     
@@ -50,7 +59,7 @@ def test_create_cluster_mock():
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-def test_deploy_venom_mock():
+def test_deploy_venom_mock(mock_container_client):
     """Test VENOM deployment (mock)"""
     deployer = GKEDeployer(project_id='test-project')
     
@@ -58,7 +67,7 @@ def test_deploy_venom_mock():
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-def test_scale_deployment_mock():
+def test_scale_deployment_mock(mock_container_client):
     """Test deployment scaling (mock)"""
     deployer = GKEDeployer(project_id='test-project')
     
@@ -66,7 +75,7 @@ def test_scale_deployment_mock():
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-def test_get_pods_status_mock():
+def test_get_pods_status_mock(mock_container_client):
     """Test getting pod status (mock)"""
     deployer = GKEDeployer(project_id='test-project')
     
@@ -74,7 +83,7 @@ def test_get_pods_status_mock():
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-def test_delete_cluster_mock():
+def test_delete_cluster_mock(mock_container_client):
     """Test cluster deletion (mock)"""
     deployer = GKEDeployer(project_id='test-project')
     

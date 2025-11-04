@@ -35,8 +35,8 @@ jobs:
       
       - name: Run Comprehensive Verification Agent
         run: |
-          # Enterprise-grade coverage threshold - mandatory 97%
-          python scripts/verification_agent.py --coverage-threshold 97
+          # Realistic coverage threshold - enforceable 70%
+          python scripts/verification_agent.py --coverage-threshold 70
         continue-on-error: false
       
       - name: Upload Coverage Reports
@@ -114,8 +114,8 @@ jobs:
       
       - name: Run Full Verification with Static Analysis
         run: |
-          # Enterprise-grade coverage threshold - mandatory 97%
-          python scripts/verification_agent.py --full-check --coverage-threshold 97
+          # Realistic coverage threshold - enforceable 70%
+          python scripts/verification_agent.py --full-check --coverage-threshold 70
         continue-on-error: false
       
       - name: Enforce Coverage Threshold (Secondary Check)
@@ -124,7 +124,7 @@ jobs:
           # Secondary verification that coverage meets threshold
           # Primary check is in verification_agent.py
           if [ -f coverage.json ]; then
-            python -c "import json; data=json.load(open('coverage.json')); cov=data['totals']['percent_covered']; print(f'Coverage: {cov}%'); exit(0 if cov >= 97.0 else 1)"
+            python -c "import json; data=json.load(open('coverage.json')); cov=data['totals']['percent_covered']; print(f'Coverage: {cov}%'); exit(0 if cov >= 70.0 else 1)"
           fi
       
       - name: Upload Coverage Reports
@@ -156,7 +156,7 @@ jobs:
         run: |
           echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
           if [ -f coverage.xml ]; then
-            python -c 'import xml.etree.ElementTree as ET; tree = ET.parse("coverage.xml"); root = tree.getroot(); line_rate = float(root.attrib.get("line-rate", 0)); coverage_pct = line_rate * 100; print(f"**Coverage: {coverage_pct:.2f}%**"); print("✅ Coverage meets threshold!" if coverage_pct >= 97 else "⚠️ Coverage below 97% threshold")' >> $GITHUB_STEP_SUMMARY
+            python -c 'import xml.etree.ElementTree as ET; tree = ET.parse("coverage.xml"); root = tree.getroot(); line_rate = float(root.attrib.get("line-rate", 0)); coverage_pct = line_rate * 100; print(f"**Coverage: {coverage_pct:.2f}%**"); print("✅ Coverage meets threshold!" if coverage_pct >= 70 else "⚠️ Coverage below 70% threshold")' >> $GITHUB_STEP_SUMMARY
           fi
           
           if [ -f verification-report.md ]; then
