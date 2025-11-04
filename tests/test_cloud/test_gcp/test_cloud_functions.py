@@ -1,6 +1,7 @@
 """Tests for GCP Cloud Functions Handler"""
 import pytest
 import json
+from unittest.mock import Mock, patch
 
 # Try to import GCP modules
 try:
@@ -54,8 +55,11 @@ def test_benchmark_gcp():
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-def test_cloud_functions_deployer_init():
+@patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient')
+def test_cloud_functions_deployer_init(mock_client):
     """Test Cloud Functions deployer initialization"""
+    mock_client.return_value = Mock()
+    
     deployer = CloudFunctionsDeployer(
         project_id='test-project',
         region='us-central1'
@@ -66,8 +70,11 @@ def test_cloud_functions_deployer_init():
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-def test_cloud_functions_deployer_methods():
+@patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient')
+def test_cloud_functions_deployer_methods(mock_client):
     """Test Cloud Functions deployer has required methods"""
+    mock_client.return_value = Mock()
+    
     deployer = CloudFunctionsDeployer(project_id='test-project')
     
     assert hasattr(deployer, 'create_function')
@@ -78,16 +85,22 @@ def test_cloud_functions_deployer_methods():
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-def test_create_function_mock():
+@patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient')
+def test_create_function_mock(mock_client):
     """Test function creation (mock)"""
+    mock_client.return_value = Mock()
+    
     deployer = CloudFunctionsDeployer(project_id='test-project')
     
     assert callable(deployer.create_function)
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-def test_invoke_mock():
+@patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient')
+def test_invoke_mock(mock_client):
     """Test function invocation (mock)"""
+    mock_client.return_value = Mock()
+    
     deployer = CloudFunctionsDeployer(project_id='test-project')
     
     assert callable(deployer.invoke)
