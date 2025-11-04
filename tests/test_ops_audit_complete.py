@@ -134,14 +134,18 @@ def test_log_event_file_error_handling(temp_audit_file):
     """Test _log_event handles file write errors"""
     from venom.ops.audit import AuditTrail
     
-    audit = AuditTrail(enabled=True, audit_file="/invalid/path/audit.jsonl")
+    # Mock Path.mkdir to avoid permission error during init
+    with patch('venom.ops.audit.Path') as mock_path:
+        mock_path.return_value.parent.mkdir = Mock()
+        audit = AuditTrail(enabled=True, audit_file="/invalid/path/audit.jsonl")
     
-    # Should not raise exception, just log error
+    # Should not raise exception, just log error when trying to write
     with patch('venom.ops.audit.logger') as mock_logger:
-        audit._log_event("TEST", {"data": "value"})
-        
-        # Should log error
-        assert mock_logger.error.called
+        with patch('builtins.open', side_effect=PermissionError("No permission")):
+            audit._log_event("TEST", {"data": "value"})
+            
+            # Should log error
+            assert mock_logger.error.called
 
 
 def test_detect_phase(temp_audit_file):

@@ -24,9 +24,22 @@ def mock_ledger():
     """Create mock ledger with proper structure"""
     ledger = Mock()
     ledger.chain = []
+    # Use correct LedgerEntry format with required fields
     ledger.export_chain.return_value = [
-        {"beat": 1, "theta": 0.5, "timestamp": 1000},
-        {"beat": 2, "theta": 0.6, "timestamp": 2000},
+        {
+            "index": 0,
+            "timestamp": 1000.0,
+            "data": {"type": "genesis"},
+            "previous_hash": "0" * 64,
+            "hash": "a" * 64
+        },
+        {
+            "index": 1,
+            "timestamp": 2000.0,
+            "data": {"beat": 1, "theta": 0.5},
+            "previous_hash": "a" * 64,
+            "hash": "b" * 64
+        },
     ]
     ledger.compute_merkle_root.return_value = "abc123"
     ledger.verify_chain.return_value = True
@@ -257,9 +270,11 @@ def test_on_beat_multiple_cycles(mock_ledger, temp_backup_dir):
     manager = BackupManager(mock_ledger, backup_dir=temp_backup_dir, enabled=True)
     manager.backup_interval = 3
     
-    # Trigger 2 complete cycles
+    # Trigger 2 complete cycles with delays to ensure distinct timestamps
     for i in range(7):
         manager.on_beat(i)
+        if (i + 1) % 3 == 0:  # After each backup trigger
+            time.sleep(1.1)  # Ensure distinct second in timestamp
     
     # Should have created 2 backups
     backups = manager.list_backups()
@@ -294,17 +309,18 @@ def test_list_backups_multiple(mock_ledger, temp_backup_dir):
     
     manager = BackupManager(mock_ledger, backup_dir=temp_backup_dir, enabled=True)
     
-    # Create multiple backups
+    # Create multiple backups - use default naming that starts with "ledger_"
+    # Need at least 1 second delay for distinct filenames
     for i in range(3):
-        manager.backup(filename=f"backup_{i}.json.gz")
-        time.sleep(0.01)  # Small delay to ensure different timestamps
+        manager.backup()
+        time.sleep(1.1)  # Ensure distinct second in timestamp
     
     backups = manager.list_backups()
     
     assert len(backups) == 3
     # Should be sorted in reverse order (newest first)
     for backup in backups:
-        assert "backup_" in backup
+        assert "ledger_" in backup
         assert backup.endswith(".json.gz")
 
 
@@ -314,10 +330,10 @@ def test_list_backups_sorted_order(mock_ledger, temp_backup_dir):
     
     manager = BackupManager(mock_ledger, backup_dir=temp_backup_dir, enabled=True)
     
-    # Create backups with known timestamps
+    # Create backups with known timestamps - need at least 1 second delay for distinct filenames
     files = []
     for i in range(3):
-        time.sleep(0.01)
+        time.sleep(1.1)  # Ensure distinct second in timestamp
         result = manager.backup()
         files.append(result)
     
@@ -382,7 +398,8 @@ def test_restore_ledger_entry_creation(mock_ledger, temp_backup_dir):
     # Create and restore
     backup_file = manager.backup()
     
-    with patch('venom.ops.backup.LedgerEntry') as mock_entry:
+    # Patch LedgerEntry at its actual import location within the restore method
+    with patch('venom.ledger.immutable_ledger.LedgerEntry') as mock_entry:
         result = manager.restore(backup_file, verify=False)
         
         # Should have created 2 entries

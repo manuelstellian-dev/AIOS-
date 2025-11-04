@@ -153,3 +153,66 @@ def test_canonical_json_hashing():
     json1 = json.dumps(entry1.data, sort_keys=True, separators=(",", ":"))
     json2 = json.dumps(entry2.data, sort_keys=True, separators=(",", ":"))
     assert json1 == json2
+
+
+def test_ledger_entry_to_dict():
+    """Test LedgerEntry to_dict conversion"""
+    entry = LedgerEntry(
+        index=1,
+        timestamp=1000.0,
+        data={"test": "data"},
+        previous_hash="abc123",
+        hash="def456"
+    )
+    
+    entry_dict = entry.to_dict()
+    assert entry_dict["index"] == 1
+    assert entry_dict["timestamp"] == 1000.0
+    assert entry_dict["data"] == {"test": "data"}
+
+
+def test_chain_verification_broken_linkage():
+    """Test chain verification detects broken linkage"""
+    ledger = ImmutableLedger()
+    ledger.add_entry({"data": 1})
+    ledger.add_entry({"data": 2})
+    
+    # Break the chain linkage
+    ledger.chain[2].previous_hash = "invalid_hash"
+    
+    assert ledger.verify_chain() == False
+
+
+def test_get_latest_entry():
+    """Test getting the latest entry"""
+    ledger = ImmutableLedger()
+    ledger.add_entry({"data": 1})
+    ledger.add_entry({"data": 2})
+    
+    latest = ledger.get_latest_entry()
+    assert latest.data == {"data": 2}
+
+
+def test_export_chain():
+    """Test exporting chain to list of dicts"""
+    ledger = ImmutableLedger()
+    ledger.add_entry({"data": 1})
+    
+    exported = ledger.export_chain()
+    assert isinstance(exported, list)
+    assert len(exported) == 2
+    assert all(isinstance(e, dict) for e in exported)
+
+
+def test_merkle_root_empty_chain():
+    """Test merkle root computation with empty chain scenario"""
+    # Create ledger and clear chain to simulate empty state
+    ledger = ImmutableLedger()
+    original_chain = ledger.chain.copy()
+    ledger.chain = []
+    
+    merkle_root = ledger.compute_merkle_root()
+    assert merkle_root == "0" * 64
+    
+    # Restore chain
+    ledger.chain = original_chain
