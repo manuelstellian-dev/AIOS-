@@ -29,7 +29,7 @@
 ## 🏆 Enterprise-Grade Quality Standards
 
 ### Quality Gates
-- ✅ **Test Coverage: 97%+** - Obligatoriu pentru toate PR-urile
+- ✅ **Test Coverage: 97%+** - Mandatory for all pull requests
 - ✅ **Static Analysis: Zero Critical Issues** - flake8, pylint, mypy, bandit
 - ✅ **Security Scanning: No Vulnerabilities** - Continuous security audit
 - ✅ **Code Review: Mandatory** - Minimum 2 approvals for production

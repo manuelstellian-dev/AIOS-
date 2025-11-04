@@ -123,6 +123,7 @@ ensure_newline_before_comments = true
 python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
+# Set to false for gradual typing adoption - will be enabled as codebase matures
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 check_untyped_defs = true
@@ -131,6 +132,8 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 strict_equality = true
+# Note: For full enterprise-grade typing, set disallow_untyped_defs = true
+# and disallow_incomplete_defs = true once type annotations are complete
 
 [tool.pylint.messages_control]
 disable = [

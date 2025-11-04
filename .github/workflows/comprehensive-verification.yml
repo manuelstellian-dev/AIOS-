@@ -118,10 +118,13 @@ jobs:
           python scripts/verification_agent.py --full-check --coverage-threshold 97
         continue-on-error: false
       
-      - name: Enforce Coverage Threshold
+      - name: Enforce Coverage Threshold (Secondary Check)
+        if: always()
         run: |
+          # Secondary verification that coverage meets threshold
+          # Primary check is in verification_agent.py
           if [ -f coverage.json ]; then
-            python -c "import json; data=json.load(open('coverage.json')); cov=data['totals']['percent_covered']; exit(0 if cov >= 97.0 else 1)"
+            python -c "import json; data=json.load(open('coverage.json')); cov=data['totals']['percent_covered']; print(f'Coverage: {cov}%'); exit(0 if cov >= 97.0 else 1)"
           fi
       
       - name: Upload Coverage Reports
