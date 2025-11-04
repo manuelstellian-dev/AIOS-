@@ -35,9 +35,9 @@ jobs:
       
       - name: Run Comprehensive Verification Agent
         run: |
-          # Temporary threshold - will increase to 97% after fixes
-          python scripts/verification_agent.py --coverage-threshold 65
-        continue-on-error: true
+          # Enterprise-grade coverage threshold - mandatory 97%
+          python scripts/verification_agent.py --coverage-threshold 97
+        continue-on-error: false
       
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v4
@@ -114,9 +114,15 @@ jobs:
       
       - name: Run Full Verification with Static Analysis
         run: |
-          # Temporary threshold - will increase to 97% after fixes
-          python scripts/verification_agent.py --full-check --coverage-threshold 65
-        continue-on-error: true
+          # Enterprise-grade coverage threshold - mandatory 97%
+          python scripts/verification_agent.py --full-check --coverage-threshold 97
+        continue-on-error: false
+      
+      - name: Enforce Coverage Threshold
+        run: |
+          if [ -f coverage.json ]; then
+            python -c "import json; data=json.load(open('coverage.json')); cov=data['totals']['percent_covered']; exit(0 if cov >= 97.0 else 1)"
+          fi
       
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v4
