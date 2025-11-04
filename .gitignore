@@ -38,6 +38,11 @@ ENV/
 .coverage
 htmlcov/
 .tox/
+coverage.xml
+coverage.json
+verification-report.md
+coverage-detailed.md
+tests/generated/
 
 # Logs
 *.log
