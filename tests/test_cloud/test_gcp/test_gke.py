@@ -12,12 +12,17 @@ except ImportError:
     GKEDeployer = None
 
 
+@pytest.fixture
+def mock_container_client():
+    """Fixture to mock GCP Container client"""
+    with patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient') as mock:
+        mock.return_value = Mock()
+        yield mock
+
+
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-@patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient')
-def test_gke_deployer_init(mock_client):
+def test_gke_deployer_init(mock_container_client):
     """Test GKE deployer initialization"""
-    mock_client.return_value = Mock()
-    
     deployer = GKEDeployer(
         project_id='test-project',
         cluster_name='test-cluster',
@@ -30,11 +35,8 @@ def test_gke_deployer_init(mock_client):
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-@patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient')
-def test_gke_deployer_methods(mock_client):
+def test_gke_deployer_methods(mock_container_client):
     """Test GKE deployer has required methods"""
-    mock_client.return_value = Mock()
-    
     deployer = GKEDeployer(
         project_id='test-project',
         cluster_name='test-cluster'
@@ -49,55 +51,40 @@ def test_gke_deployer_methods(mock_client):
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-@patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient')
-def test_create_cluster_mock(mock_client):
+def test_create_cluster_mock(mock_container_client):
     """Test cluster creation (mock)"""
-    mock_client.return_value = Mock()
-    
     deployer = GKEDeployer(project_id='test-project')
     
     assert callable(deployer.create_cluster)
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-@patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient')
-def test_deploy_venom_mock(mock_client):
+def test_deploy_venom_mock(mock_container_client):
     """Test VENOM deployment (mock)"""
-    mock_client.return_value = Mock()
-    
     deployer = GKEDeployer(project_id='test-project')
     
     assert callable(deployer.deploy_venom)
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-@patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient')
-def test_scale_deployment_mock(mock_client):
+def test_scale_deployment_mock(mock_container_client):
     """Test deployment scaling (mock)"""
-    mock_client.return_value = Mock()
-    
     deployer = GKEDeployer(project_id='test-project')
     
     assert callable(deployer.scale_deployment)
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-@patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient')
-def test_get_pods_status_mock(mock_client):
+def test_get_pods_status_mock(mock_container_client):
     """Test getting pod status (mock)"""
-    mock_client.return_value = Mock()
-    
     deployer = GKEDeployer(project_id='test-project')
     
     assert callable(deployer.get_pods_status)
 
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason="GCP SDK not available")
-@patch('venom.cloud.gcp.gke_deployer.container_v1.ClusterManagerClient')
-def test_delete_cluster_mock(mock_client):
+def test_delete_cluster_mock(mock_container_client):
     """Test cluster deletion (mock)"""
-    mock_client.return_value = Mock()
-    
     deployer = GKEDeployer(project_id='test-project')
     
     assert callable(deployer.delete_cluster)

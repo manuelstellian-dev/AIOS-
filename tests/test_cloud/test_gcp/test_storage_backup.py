@@ -14,12 +14,17 @@ except ImportError:
     ImmutableLedger = None
 
 
+@pytest.fixture
+def mock_storage_client():
+    """Fixture to mock GCP Storage client"""
+    with patch('venom.cloud.gcp.storage_backup.storage.Client') as mock:
+        mock.return_value = Mock()
+        yield mock
+
+
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-@patch('venom.cloud.gcp.storage_backup.storage.Client')
-def test_storage_backup_manager_init(mock_client):
+def test_storage_backup_manager_init(mock_storage_client):
     """Test Storage backup manager initialization"""
-    mock_client.return_value = Mock()
-    
     manager = StorageBackupManager(
         bucket_name='test-bucket',
         project_id='test-project'
@@ -30,11 +35,8 @@ def test_storage_backup_manager_init(mock_client):
 
 
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-@patch('venom.cloud.gcp.storage_backup.storage.Client')
-def test_storage_backup_manager_methods(mock_client):
+def test_storage_backup_manager_methods(mock_storage_client):
     """Test Storage backup manager has required methods"""
-    mock_client.return_value = Mock()
-    
     manager = StorageBackupManager(
         bucket_name='test-bucket',
         project_id='test-project'
@@ -49,11 +51,8 @@ def test_storage_backup_manager_methods(mock_client):
 
 
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-@patch('venom.cloud.gcp.storage_backup.storage.Client')
-def test_backup_ledger_mock(mock_client):
+def test_backup_ledger_mock(mock_storage_client):
     """Test ledger backup (mock)"""
-    mock_client.return_value = Mock()
-    
     manager = StorageBackupManager(
         bucket_name='test-bucket',
         project_id='test-project'
@@ -66,11 +65,8 @@ def test_backup_ledger_mock(mock_client):
 
 
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-@patch('venom.cloud.gcp.storage_backup.storage.Client')
-def test_list_backups_mock(mock_client):
+def test_list_backups_mock(mock_storage_client):
     """Test listing backups (mock)"""
-    mock_client.return_value = Mock()
-    
     manager = StorageBackupManager(
         bucket_name='test-bucket',
         project_id='test-project'
@@ -80,11 +76,8 @@ def test_list_backups_mock(mock_client):
 
 
 @pytest.mark.skipif(not GCP_STORAGE_AVAILABLE, reason="GCP Storage SDK not available")
-@patch('venom.cloud.gcp.storage_backup.storage.Client')
-def test_backup_state_method(mock_client):
+def test_backup_state_method(mock_storage_client):
     """Test state backup method exists"""
-    mock_client.return_value = Mock()
-    
     manager = StorageBackupManager(
         bucket_name='test-bucket',
         project_id='test-project'

@@ -20,6 +20,14 @@ except ImportError:
     CloudFunctionsDeployer = None
 
 
+@pytest.fixture
+def mock_functions_client():
+    """Fixture to mock GCP Functions client"""
+    with patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient') as mock:
+        mock.return_value = Mock()
+        yield mock
+
+
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
 def test_health_check_gcp():
     """Test GCP health check"""
@@ -55,11 +63,8 @@ def test_benchmark_gcp():
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-@patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient')
-def test_cloud_functions_deployer_init(mock_client):
+def test_cloud_functions_deployer_init(mock_functions_client):
     """Test Cloud Functions deployer initialization"""
-    mock_client.return_value = Mock()
-    
     deployer = CloudFunctionsDeployer(
         project_id='test-project',
         region='us-central1'
@@ -70,11 +75,8 @@ def test_cloud_functions_deployer_init(mock_client):
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-@patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient')
-def test_cloud_functions_deployer_methods(mock_client):
+def test_cloud_functions_deployer_methods(mock_functions_client):
     """Test Cloud Functions deployer has required methods"""
-    mock_client.return_value = Mock()
-    
     deployer = CloudFunctionsDeployer(project_id='test-project')
     
     assert hasattr(deployer, 'create_function')
@@ -85,22 +87,16 @@ def test_cloud_functions_deployer_methods(mock_client):
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-@patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient')
-def test_create_function_mock(mock_client):
+def test_create_function_mock(mock_functions_client):
     """Test function creation (mock)"""
-    mock_client.return_value = Mock()
-    
     deployer = CloudFunctionsDeployer(project_id='test-project')
     
     assert callable(deployer.create_function)
 
 
 @pytest.mark.skipif(not GCP_FUNCTIONS_AVAILABLE, reason="GCP Functions SDK not available")
-@patch('venom.cloud.gcp.cloud_functions.functions_v1.CloudFunctionsServiceClient')
-def test_invoke_mock(mock_client):
+def test_invoke_mock(mock_functions_client):
     """Test function invocation (mock)"""
-    mock_client.return_value = Mock()
-    
     deployer = CloudFunctionsDeployer(project_id='test-project')
     
     assert callable(deployer.invoke)
