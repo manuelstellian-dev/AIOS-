@@ -106,6 +106,12 @@ jobs:
       - name: Make verification script executable
         run: chmod +x scripts/verification_agent.py
       
+      - name: Generate Missing Tests (if coverage low)
+        run: |
+          # Run auto-generator to create tests for uncovered code
+          python scripts/auto_generate_tests.py --max-files 20 || true
+        continue-on-error: true
+      
       - name: Run Full Verification with Static Analysis
         run: |
           # Temporary threshold - will increase to 97% after fixes
