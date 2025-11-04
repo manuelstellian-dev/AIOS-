@@ -51,6 +51,9 @@ Every commit goes through:
 - [HTML Coverage Report](./htmlcov/index.html) - Detailed line-by-line coverage
 - [Verification Report](./verification-report.md) - Complete verification results
 - [Coverage Badge](https://img.shields.io/badge/coverage-97%25+-brightgreen) - Real-time coverage status
+- [Coverage Roadmap](./COVERAGE_ROADMAP.md) - Path to 97% coverage
+
+**Note:** Enterprise-grade infrastructure is in place with 97% threshold enforced. See [Coverage Roadmap](./COVERAGE_ROADMAP.md) for the plan to reach target coverage.
 
 ### Running Verification Locally
 
@@ -65,6 +68,29 @@ python scripts/verification_agent.py --full-check --coverage-threshold 97
 open htmlcov/index.html  # macOS
 xdg-open htmlcov/index.html  # Linux
 ```
+
+### Pre-commit Hooks
+
+Enable automatic quality checks before every commit:
+
+```bash
+# Install pre-commit hooks
+git config core.hooksPath .githooks
+
+# Verify installation
+git config core.hooksPath
+
+# Test the hook
+git add .
+git commit -m "test"
+```
+
+The pre-commit hook will:
+- Run verification with 97% coverage threshold
+- Block commits that don't meet enterprise standards
+- Provide detailed error messages
+
+See [.githooks/README.md](.githooks/README.md) for more details.
 
 ### CI/CD Pipeline
 Our GitHub Actions workflow enforces:
