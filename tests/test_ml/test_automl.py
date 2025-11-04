@@ -4,6 +4,11 @@ import pandas as pd
 import numpy as np
 from venom.ml.automl import AutoMLPipeline
 
+# Suppress expected warnings for missing optuna
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::UserWarning"
+)
+
 
 @pytest.fixture
 def pipeline():

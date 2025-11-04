@@ -7,6 +7,11 @@ import tempfile
 import os
 from pathlib import Path
 
+# Suppress expected warnings
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::UserWarning"
+)
+
 
 class TestEndToEnd:
     """End-to-end integration tests"""

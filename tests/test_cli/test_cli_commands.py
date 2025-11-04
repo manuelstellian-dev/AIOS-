@@ -17,6 +17,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from venom.cli.main import VenomCLI, main
 
+# Suppress expected warnings
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::UserWarning"
+)
+
 
 class TestModulesCommands:
     """Test module management commands"""

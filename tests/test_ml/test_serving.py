@@ -3,6 +3,11 @@ import pytest
 import time
 from venom.ml.model_serving import ModelServer
 
+# Suppress expected warnings
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::UserWarning"
+)
+
 
 class DummyModel:
     """Dummy model for testing"""

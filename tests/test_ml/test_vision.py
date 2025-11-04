@@ -5,6 +5,11 @@ import numpy as np
 from PIL import Image
 from venom.ml.vision_models import VisionModelBridge
 
+# Suppress expected warnings for missing torch/torchvision
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::UserWarning"
+)
+
 
 @pytest.fixture
 def bridge():
