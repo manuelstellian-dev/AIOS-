@@ -1,0 +1,158 @@
+name: Comprehensive Code Verification & Testing
+
+on:
+  push:
+    branches: [ main, develop, master ]
+  pull_request:
+    branches: [ main, develop, master ]
+  workflow_dispatch:
+
+jobs:
+  comprehensive-verification:
+    name: Full Verification Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+      fail-fast: false
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      
+      - name: Make verification script executable
+        run: chmod +x scripts/verification_agent.py
+      
+      - name: Run Comprehensive Verification Agent
+        run: |
+          python scripts/verification_agent.py --coverage-threshold 97
+        continue-on-error: true
+      
+      - name: Upload Coverage Reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella-py${{ matrix.python-version }}
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: |
+            htmlcov/
+            coverage.xml
+            .coverage
+            verification-report.md
+      
+      - name: Upload Verification Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-report-${{ matrix.python-version }}
+          path: verification-report.md
+      
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request' && matrix.python-version == '3.11'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const report = fs.readFileSync('verification-report.md', 'utf8');
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## Comprehensive Verification Report (Python ${{ matrix.python-version }})\n\n${report}`
+              });
+            } catch (error) {
+              console.log('Could not post comment:', error.message);
+            }
+
+  full-verification-with-analysis:
+    name: Full Verification with Static Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Make verification script executable
+        run: chmod +x scripts/verification_agent.py
+      
+      - name: Run Full Verification with Static Analysis
+        run: |
+          python scripts/verification_agent.py --full-check --coverage-threshold 97
+        continue-on-error: true
+      
+      - name: Upload Coverage Reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage.xml
+          flags: unittests,full-analysis
+          name: codecov-full-analysis
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      
+      - name: Upload Full Verification Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-verification-results
+          path: |
+            htmlcov/
+            coverage.xml
+            coverage.json
+            .coverage
+            verification-report.md
+            tests/generated/
+      
+      - name: Display Coverage Summary
+        if: always()
+        run: |
+          echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage.xml ]; then
+            python -c "
+import xml.etree.ElementTree as ET
+tree = ET.parse('coverage.xml')
+root = tree.getroot()
+line_rate = float(root.attrib.get('line-rate', 0))
+coverage_pct = line_rate * 100
+print(f'**Coverage: {coverage_pct:.2f}%**')
+if coverage_pct >= 97:
+    print('✅ Coverage meets threshold!')
+else:
+    print('⚠️ Coverage below 97% threshold')
+" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -f verification-report.md ]; then
+            cat verification-report.md >> $GITHUB_STEP_SUMMARY
+          fi
