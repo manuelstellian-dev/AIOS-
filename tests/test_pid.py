@@ -49,6 +49,20 @@ def test_pid_anti_windup():
     assert pid.integral <= 1.0
 
 
+def test_pid_history_trimming():
+    """Test PID history is trimmed to last 1000 entries"""
+    pid = GenomicPID()
+    
+    # Add more than 1000 entries
+    for i in range(1500):
+        pid.compute(t_lambda=0.01 + i * 0.001, timestamp=float(i))
+    
+    # History should be trimmed to 1000
+    assert len(pid.stability_history) == 1000
+    # Should keep the most recent ones
+    assert pid.stability_history[-1]["timestamp"] == 1499.0
+
+
 def test_pid_epsilon_reset():
     """Test ε-reset when error is very small"""
     pid = GenomicPID(kp=0.6, ki=0.1, kd=0.05, t_threshold=0.02)
