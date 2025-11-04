@@ -128,3 +128,27 @@ def test_encrypt_decrypt_roundtrip():
     encrypted_rsa = AdvancedEncryption.encrypt_asymmetric(test_data, public_key)
     decrypted_rsa = AdvancedEncryption.decrypt_asymmetric(encrypted_rsa, private_key)
     assert decrypted_rsa == test_data
+
+
+def test_unsupported_algorithm():
+    """Test initialization with unsupported algorithm raises error"""
+    with pytest.raises(ValueError, match="Unsupported algorithm"):
+        AdvancedEncryption('invalid-algorithm')
+
+
+def test_encrypt_unsupported_algorithm():
+    """Test encrypt with RSA algorithm raises error"""
+    enc = AdvancedEncryption('rsa')
+    key = b"test_key"
+    
+    with pytest.raises(ValueError, match="Symmetric encryption not supported"):
+        enc.encrypt(b"test data", key)
+
+
+def test_decrypt_unsupported_algorithm():
+    """Test decrypt with RSA algorithm raises error"""
+    enc = AdvancedEncryption('rsa')
+    key = b"test_key"
+    
+    with pytest.raises(ValueError, match="Symmetric decryption not supported"):
+        enc.decrypt(b"encrypted_data", key)
