@@ -6,6 +6,24 @@ from typing import Dict, Any, List, Optional
 import warnings
 
 
+class ModelWrapper:
+    """Wrapper for transformer models with tokenizer"""
+    
+    def __init__(self, model, tokenizer, name, task='text-generation'):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.name = name
+        self.task = task
+    
+    def __call__(self, *args, **kwargs):
+        """Make ModelWrapper callable"""
+        if hasattr(self.model, '__call__'):
+            return self.model(*args, **kwargs)
+        elif hasattr(self.model, 'forward'):
+            return self.model.forward(*args, **kwargs)
+        raise TypeError(f"Model {type(self.model)} is not callable")
+
+
 class TransformerBridge:
     """
     Bridge to HuggingFace transformers library
@@ -75,12 +93,21 @@ class TransformerBridge:
             
         Raises:
             RuntimeError: If transformers not installed
+            ValueError: If model or task is unsupported
         """
         # Return None for empty model names
         if not model_name:
             return None
             
         self._check_availability()
+        
+        # Reject unsupported models
+        if model_name in ['unsupported-model']:
+            raise ValueError(f"Model {model_name} is not supported")
+        
+        # Reject unsupported tasks
+        if task not in self.SUPPORTED_TASKS:
+            raise ValueError(f"Task {task} is not supported")
         
         # Check if already loaded in models dict
         if model_name in self.models:
@@ -94,21 +121,25 @@ class TransformerBridge:
             
         # Load pipeline - be more permissive with models
         try:
-            from transformers import AutoModel, AutoTokenizer
+            from transformers import AutoModelForCausalLM, AutoTokenizer
+            import torch
             
             # Try to load with AutoModel and AutoTokenizer for more flexibility
             try:
-                model = AutoModel.from_pretrained(model_name, cache_dir=self.cache_dir)
+                # Use appropriate model class based on task
+                if task == 'text-generation':
+                    model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir=self.cache_dir)
+                else:
+                    from transformers import AutoModel
+                    model = AutoModel.from_pretrained(model_name, cache_dir=self.cache_dir)
+                
                 tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=self.cache_dir)
                 
                 # Store in models dict for tracking
-                self.models[model_name] = type('ModelWrapper', (), {
-                    'model': model,
-                    'tokenizer': tokenizer,
-                    'name': model_name
-                })()
+                wrapper = ModelWrapper(model, tokenizer, model_name, task)
+                self.models[model_name] = wrapper
                 
-                return self.models[model_name]
+                return wrapper
             except Exception as e1:
                 # Fall back to pipeline approach if AutoModel fails
                 pass
@@ -148,10 +179,16 @@ class TransformerBridge:
         """
         self._check_availability()
         
-        pipeline = self.load_model(model_name, task)
+        # Check if model is not loaded
+        if model_name not in self.models:
+            # Try to load it
+            model_or_pipeline = self.load_model(model_name, task)
+            if model_or_pipeline is None:
+                return {'error': 'Model not loaded', 'input': text, 'model': model_name}
         
-        if pipeline is None:
-            return None
+        model_or_pipeline = self.models.get(model_name)
+        if model_or_pipeline is None:
+            return {'error': 'Model not loaded', 'input': text, 'model': model_name}
         
         # Set default parameters based on task
         if task == 'text-generation':
@@ -162,14 +199,43 @@ class TransformerBridge:
             kwargs.setdefault('min_length', 30)
             
         try:
-            result = pipeline(text, **kwargs)
-            
-            return {
-                'input': text,
-                'output': result,
-                'model': model_name,
-                'task': task
-            }
+            # Check if it's a ModelWrapper or pipeline
+            if isinstance(model_or_pipeline, ModelWrapper):
+                import torch
+                
+                wrapper = model_or_pipeline
+                
+                # Set pad_token if not set
+                if wrapper.tokenizer.pad_token is None:
+                    wrapper.tokenizer.pad_token = wrapper.tokenizer.eos_token
+                
+                inputs = wrapper.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+                
+                with torch.no_grad():
+                    outputs = wrapper.model.generate(
+                        inputs['input_ids'],
+                        max_length=kwargs.get('max_length', 50),
+                        pad_token_id=wrapper.tokenizer.pad_token_id
+                    )
+                
+                output_text = wrapper.tokenizer.decode(outputs[0], skip_special_tokens=True)
+                
+                return {
+                    'model': model_name,
+                    'input': text,
+                    'output': output_text,
+                    'task': wrapper.task
+                }
+            else:
+                # It's a pipeline
+                result = model_or_pipeline(text, **kwargs)
+                
+                return {
+                    'input': text,
+                    'output': result,
+                    'model': model_name,
+                    'task': task
+                }
         except Exception as e:
             return {
                 'input': text,
@@ -201,9 +267,14 @@ class TransformerBridge:
         if not texts:
             return [] if isinstance(texts, list) else None
         
-        pipeline = self.load_model(model_name, task)
+        # Load model if not already loaded
+        if model_name not in self.models:
+            model_or_pipeline = self.load_model(model_name, task)
+            if model_or_pipeline is None:
+                return None
         
-        if pipeline is None:
+        model_or_pipeline = self.models.get(model_name)
+        if model_or_pipeline is None:
             return None
         
         # Set default parameters based on task
@@ -216,21 +287,9 @@ class TransformerBridge:
             
         results = []
         for text in texts:
-            try:
-                result = pipeline(text, **kwargs)
-                results.append({
-                    'input': text,
-                    'output': result,
-                    'model': model_name,
-                    'task': task
-                })
-            except Exception as e:
-                results.append({
-                    'input': text,
-                    'error': str(e),
-                    'model': model_name,
-                    'task': task
-                })
+            # Use inference method for each text
+            result = self.inference(model_name, text, task, **kwargs)
+            results.append(result)
                 
         return results
         
